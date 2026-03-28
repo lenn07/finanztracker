@@ -2,6 +2,7 @@ package group.Finanztracker.controller;
 
 import group.Finanztracker.dto.TransactionRequest;
 import group.Finanztracker.dto.TransactionResponse;
+import group.Finanztracker.entity.TransactionType;
 import group.Finanztracker.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,11 +25,27 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.findAll());
     }
 
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<TransactionResponse>> getByCategoryId(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(transactionService.findAllByCategoryId(categoryId));
+    }
+
+    @GetMapping("/type/{type}")
+    public ResponseEntity<List<TransactionResponse>> getByType(@PathVariable TransactionType type) {
+        return ResponseEntity.ok(transactionService.findAllByType(type));
+    }
+    
+    @GetMapping("/date-range")
+    public ResponseEntity<List<TransactionResponse>> getByDateRange(@RequestParam LocalDate startDate,
+        @RequestParam LocalDate endDate) {
+        return ResponseEntity.ok(transactionService.findAllByDateRange(startDate, endDate));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(transactionService.findById(id));
     }
-
+        
     @PostMapping
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.create(request));

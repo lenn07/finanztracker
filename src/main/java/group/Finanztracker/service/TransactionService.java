@@ -4,6 +4,7 @@ import group.Finanztracker.dto.TransactionRequest;
 import group.Finanztracker.dto.TransactionResponse;
 import group.Finanztracker.entity.Category;
 import group.Finanztracker.entity.Transaction;
+import group.Finanztracker.entity.TransactionType;
 import group.Finanztracker.exception.ResourceNotFoundException;
 import group.Finanztracker.mapper.TransactionMapper;
 import group.Finanztracker.repository.CategoryRepository;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,6 +27,24 @@ public class TransactionService {
 
     public List<TransactionResponse> findAll() {
         return transactionRepository.findAll().stream()
+                .map(transactionMapper::toResponse)
+                .toList();
+    }
+
+    public List<TransactionResponse> findAllByCategoryId(Long categoryId) {
+        return transactionRepository.findAllByCategory_Id(categoryId).stream()
+                .map(transactionMapper::toResponse)
+                .toList();
+    }
+
+    public List<TransactionResponse> findAllByDateRange(LocalDate startDate, LocalDate endDate) {
+        return transactionRepository.findAllByDateBetween(startDate, endDate).stream()
+                .map(transactionMapper::toResponse)
+                .toList();
+    }
+
+    public List<TransactionResponse> findAllByType(TransactionType type) {
+        return transactionRepository.findAllByType(type).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
