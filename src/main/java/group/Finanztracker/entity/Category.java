@@ -22,7 +22,7 @@ public class Category {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    @OneToMany(mappedBy = "category")
+    /*@OneToMany(mappedBy = "category")
     @Builder.Default
-    private List<Transaction> transactions = new ArrayList<>();
+    private List<Transaction> transactions = new ArrayList<>();*/
 }

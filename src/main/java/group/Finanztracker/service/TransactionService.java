@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -47,6 +48,14 @@ public class TransactionService {
         return transactionRepository.findAllByType(type).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
+    }
+
+    public BigDecimal sumAmountOfTransactions() {
+        return transactionRepository.sumAmountofTransactions();
+    }
+
+    public BigDecimal sumAmountOfTransactionsByCategory(Long categoryId) {
+        return transactionRepository.sumAmountofTransactionsByCategory(categoryId);
     }
 
     public TransactionResponse findById(Long id) {

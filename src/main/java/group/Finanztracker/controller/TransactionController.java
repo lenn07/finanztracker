@@ -45,7 +45,19 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(transactionService.findById(id));
     }
-        
+
+    @GetMapping("/sum/{categoryId}")
+    public ResponseEntity<String> getSumOfTransactionsByCategory(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(transactionService.sumAmountOfTransactionsByCategory(categoryId).toString());
+    }
+    
+
+    @GetMapping("/sum")
+    public ResponseEntity<String> getSumOfTransactions() {
+        return ResponseEntity.ok(transactionService.sumAmountOfTransactions().toString());
+    }
+
+
     @PostMapping
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.create(request));
