@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local configuration with credentials / machine-specific setup
+src/main/resources/application.properties
+compose.yaml
