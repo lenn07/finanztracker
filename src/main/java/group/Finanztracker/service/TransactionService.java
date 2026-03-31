@@ -87,6 +87,13 @@ public class TransactionService {
         return findAllByDateRange(month.atDay(1), month.atEndOfMonth());
     }
 
+    public List<TransactionResponse> findAllForMonthFiltered(YearMonth month, TransactionType type, Long categoryId) {
+        return findAllForMonth(month).stream()
+                .filter(transaction -> type == null || transaction.getType() == type)
+                .filter(transaction -> categoryId == null || transaction.getCategoryId().equals(categoryId))
+                .toList();
+    }
+
     public TransactionResponse findById(Long id) {
         Transaction transaction = getTransactionOrThrow(id);
         return transactionMapper.toResponse(transaction);

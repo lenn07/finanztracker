@@ -1,4 +1,4 @@
-package group.Finanztracker.controller;
+package group.Finanztracker.controller.REST_Controller;
 
 import group.Finanztracker.dto.TransactionRequest;
 import group.Finanztracker.dto.TransactionResponse;

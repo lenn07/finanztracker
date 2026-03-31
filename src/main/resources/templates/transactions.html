@@ -24,7 +24,7 @@
     <section class="card">
         <h2>Neue Transaktion</h2>
         <p th:if="${successMessage}" class="message success" th:text="${successMessage}"></p>
-        <form method="post" th:action="@{/transactions(month=${selectedMonth}, type=${selectedType}, categoryId=${selectedCategoryId})}" th:object="${transactionForm}" class="stack-form">
+        <form method="post" th:action="@{/transactions(month=${selectedMonth}, filterType=${selectedType}, filterCategoryId=${selectedCategoryId})}" th:object="${transactionForm}" class="stack-form">
             <label for="title">Titel</label>
             <input id="title" type="text" th:field="*{title}">
             <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
@@ -72,7 +72,7 @@
             </div>
             <div>
                 <label for="filterType">Typ</label>
-                <select id="filterType" name="type">
+                <select id="filterType" name="filterType">
                     <option value="">Alle</option>
                     <option th:each="transactionType : ${transactionTypes}"
                             th:value="${transactionType}"
@@ -82,7 +82,7 @@
             </div>
             <div>
                 <label for="filterCategoryId">Kategorie</label>
-                <select id="filterCategoryId" name="categoryId">
+                <select id="filterCategoryId" name="filterCategoryId">
                     <option value="">Alle</option>
                     <option th:each="category : ${categories}"
                             th:value="${category.id}"

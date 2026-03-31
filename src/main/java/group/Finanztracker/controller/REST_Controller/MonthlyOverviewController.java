@@ -1,4 +1,4 @@
-package group.Finanztracker.controller;
+package group.Finanztracker.controller.REST_Controller;
 
 import group.Finanztracker.dto.MonthlyOverviewResponse;
 import group.Finanztracker.service.MonthlyOverviewService;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Clock;
 import java.time.YearMonth;
 
 @RestController
@@ -18,11 +19,12 @@ import java.time.YearMonth;
 public class MonthlyOverviewController {
 
     private final MonthlyOverviewService monthlyOverviewService;
+    private final Clock clock;
 
     @GetMapping("/monthly")
     public ResponseEntity<MonthlyOverviewResponse> getMonthlyOverview(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
-        YearMonth selectedMonth = month != null ? month : YearMonth.now();
+        YearMonth selectedMonth = month != null ? month : YearMonth.now(clock);
         return ResponseEntity.ok(monthlyOverviewService.getOverview(selectedMonth));
     }
 }

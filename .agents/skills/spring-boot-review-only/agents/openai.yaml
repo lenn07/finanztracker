@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spring Boot Review Only"
+  short_description: "Prueft Code nur auf Standards und Findings."
+  default_prompt: "Nutze $spring-boot-review-only, um dieses Spring-Boot-Projekt nur zu pruefen, Verstoesse gegen Schichten, DTO-Grenzen und uebliche Konventionen zu finden und ausschliesslich Findings zu liefern."
+
+policy:
+  allow_implicit_invocation: true

@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BudgetSettingsPageData {
+public class BudgetSettingsViewModel {
 
     private Long totalBudgetId;
     private BigDecimal totalMonthlyLimit;

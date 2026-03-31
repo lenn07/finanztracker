@@ -1,0 +1,8 @@
+interface:
+  display_name: "Spring Boot Standards Reviewer"
+  short_description: "Prueft Schichten, DTOs und Spring-Konventionen."
+  default_prompt: "Nutze $spring-boot-standards-reviewer, um diesen Spring-Boot-Code auf saubere Schichten, DTO-Grenzen, Benennung und uebliche Framework-Konventionen zu pruefen und sichere Probleme wenn moeglich direkt zu beheben."
+
+policy:
+  allow_implicit_invocation: true
+

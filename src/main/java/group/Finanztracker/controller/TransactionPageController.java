@@ -1,8 +1,9 @@
 package group.Finanztracker.controller;
 
 import group.Finanztracker.dto.CategoryResponse;
-import group.Finanztracker.dto.TransactionRequest;
 import group.Finanztracker.dto.TransactionResponse;
+import group.Finanztracker.dto.TransactionForm;
+import group.Finanztracker.dto.TransactionRequest;
 import group.Finanztracker.entity.TransactionType;
 import group.Finanztracker.service.CategoryService;
 import group.Finanztracker.service.TransactionService;
@@ -37,34 +38,34 @@ public class TransactionPageController {
 
     @GetMapping
     public String transactions(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
-                               @RequestParam(required = false) TransactionType type,
-                               @RequestParam(required = false) Long categoryId,
+                               @RequestParam(required = false) TransactionType filterType,
+                               @RequestParam(required = false) Long filterCategoryId,
                                Model model) {
         YearMonth selectedMonth = month != null ? month : YearMonth.now(clock);
-        TransactionRequest request = TransactionRequest.builder()
+        TransactionForm form = TransactionForm.builder()
                 .date(LocalDate.now(clock))
                 .type(TransactionType.EXPENSE)
                 .build();
-        populateTransactionPage(model, request, selectedMonth, type, categoryId);
+        populateTransactionPage(model, form, selectedMonth, filterType, filterCategoryId);
         model.addAttribute("editing", false);
         return "transactions";
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute("transactionForm") TransactionRequest request,
+    public String create(@Valid @ModelAttribute("transactionForm") TransactionForm form,
                          BindingResult bindingResult,
                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
-                         @RequestParam(required = false) TransactionType type,
-                         @RequestParam(required = false) Long categoryId,
+                         @RequestParam(required = false) TransactionType filterType,
+                         @RequestParam(required = false) Long filterCategoryId,
                          Model model,
                          RedirectAttributes redirectAttributes) {
         YearMonth selectedMonth = month != null ? month : YearMonth.now(clock);
         if (bindingResult.hasErrors()) {
-            populateTransactionPage(model, request, selectedMonth, type, categoryId);
+            populateTransactionPage(model, form, selectedMonth, filterType, filterCategoryId);
             model.addAttribute("editing", false);
             return "transactions";
         }
-        transactionService.create(request);
+        transactionService.create(toRequest(form));
         redirectAttributes.addFlashAttribute("successMessage", "Transaktion wurde gespeichert.");
         return "redirect:/transactions?month=" + selectedMonth;
     }
@@ -72,7 +73,7 @@ public class TransactionPageController {
     @GetMapping("/{id}/edit")
     public String editPage(@PathVariable Long id, Model model) {
         TransactionResponse transaction = transactionService.findById(id);
-        TransactionRequest request = TransactionRequest.builder()
+        TransactionForm form = TransactionForm.builder()
                 .title(transaction.getTitle())
                 .amount(transaction.getAmount())
                 .type(transaction.getType())
@@ -81,7 +82,7 @@ public class TransactionPageController {
                 .note(transaction.getNote())
                 .build();
         model.addAttribute("transactionId", id);
-        model.addAttribute("transactionForm", request);
+        model.addAttribute("transactionForm", form);
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("transactionTypes", Arrays.asList(TransactionType.values()));
         model.addAttribute("editing", true);
@@ -90,7 +91,7 @@ public class TransactionPageController {
 
     @PostMapping("/{id}")
     public String update(@PathVariable Long id,
-                         @Valid @ModelAttribute("transactionForm") TransactionRequest request,
+                         @Valid @ModelAttribute("transactionForm") TransactionForm form,
                          BindingResult bindingResult,
                          Model model,
                          RedirectAttributes redirectAttributes) {
@@ -101,9 +102,9 @@ public class TransactionPageController {
             model.addAttribute("editing", true);
             return "transaction-edit";
         }
-        transactionService.update(id, request);
+        transactionService.update(id, toRequest(form));
         redirectAttributes.addFlashAttribute("successMessage", "Transaktion wurde aktualisiert.");
-        return "redirect:/transactions?month=" + YearMonth.from(request.getDate());
+        return "redirect:/transactions?month=" + YearMonth.from(form.getDate());
     }
 
     @PostMapping("/{id}/delete")
@@ -114,21 +115,29 @@ public class TransactionPageController {
     }
 
     private void populateTransactionPage(Model model,
-                                         TransactionRequest request,
+                                         TransactionForm form,
                                          YearMonth selectedMonth,
                                          TransactionType type,
                                          Long categoryId) {
-        List<TransactionResponse> transactions = transactionService.findAllForMonth(selectedMonth).stream()
-                .filter(transaction -> type == null || transaction.getType() == type)
-                .filter(transaction -> categoryId == null || transaction.getCategoryId().equals(categoryId))
-                .toList();
+        List<TransactionResponse> transactions = transactionService.findAllForMonthFiltered(selectedMonth, type, categoryId);
         List<CategoryResponse> categories = categoryService.findAll();
         model.addAttribute("transactions", transactions);
         model.addAttribute("categories", categories);
         model.addAttribute("transactionTypes", Arrays.asList(TransactionType.values()));
-        model.addAttribute("transactionForm", request);
+        model.addAttribute("transactionForm", form);
         model.addAttribute("selectedMonth", selectedMonth);
         model.addAttribute("selectedType", type);
         model.addAttribute("selectedCategoryId", categoryId);
+    }
+
+    private TransactionRequest toRequest(TransactionForm form) {
+        return TransactionRequest.builder()
+                .title(form.getTitle())
+                .amount(form.getAmount())
+                .type(form.getType())
+                .categoryId(form.getCategoryId())
+                .date(form.getDate())
+                .note(form.getNote())
+                .build();
     }
 }

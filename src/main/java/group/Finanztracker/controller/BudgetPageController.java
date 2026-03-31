@@ -1,8 +1,11 @@
 package group.Finanztracker.controller;
 
+import group.Finanztracker.dto.CategoryBudgetForm;
 import group.Finanztracker.dto.CategoryBudgetRequest;
 import group.Finanztracker.dto.CategoryBudgetResponse;
+import group.Finanztracker.dto.TotalBudgetForm;
 import group.Finanztracker.dto.TotalBudgetRequest;
+import group.Finanztracker.service.BudgetSettingsQueryService;
 import group.Finanztracker.service.CategoryBudgetService;
 import group.Finanztracker.service.CategoryService;
 import group.Finanztracker.service.TotalBudgetService;
@@ -25,43 +28,44 @@ public class BudgetPageController {
 
     private final TotalBudgetService totalBudgetService;
     private final CategoryBudgetService categoryBudgetService;
+    private final BudgetSettingsQueryService budgetSettingsQueryService;
     private final CategoryService categoryService;
 
     @GetMapping
     public String budgets(Model model) {
-        populateBudgetPage(model, new TotalBudgetRequest(), new CategoryBudgetRequest());
+        populateBudgetPage(model, new TotalBudgetForm(), new CategoryBudgetForm());
         totalBudgetService.getCurrentBudget()
                 .ifPresent(budget -> model.addAttribute("totalBudgetForm",
-                        TotalBudgetRequest.builder().totalMonthlyLimit(budget.getTotalMonthlyLimit()).build()));
+                        TotalBudgetForm.builder().totalMonthlyLimit(budget.getTotalMonthlyLimit()).build()));
         return "budgets";
     }
 
     @PostMapping("/total")
-    public String saveTotalBudget(@Valid @ModelAttribute("totalBudgetForm") TotalBudgetRequest request,
+    public String saveTotalBudget(@Valid @ModelAttribute("totalBudgetForm") TotalBudgetForm form,
                                   BindingResult bindingResult,
-                                  @ModelAttribute("categoryBudgetForm") CategoryBudgetRequest categoryBudgetRequest,
+                                  @ModelAttribute("categoryBudgetForm") CategoryBudgetForm categoryBudgetForm,
                                   Model model,
                                   RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            populateBudgetPage(model, request, categoryBudgetRequest);
+            populateBudgetPage(model, form, categoryBudgetForm);
             return "budgets";
         }
-        totalBudgetService.saveOrUpdate(request);
+        totalBudgetService.saveOrUpdate(toRequest(form));
         redirectAttributes.addFlashAttribute("successMessage", "Gesamtbudget wurde gespeichert.");
         return "redirect:/budgets";
     }
 
     @PostMapping("/category")
-    public String createCategoryBudget(@Valid @ModelAttribute("categoryBudgetForm") CategoryBudgetRequest request,
+    public String createCategoryBudget(@Valid @ModelAttribute("categoryBudgetForm") CategoryBudgetForm form,
                                        BindingResult bindingResult,
-                                       @ModelAttribute("totalBudgetForm") TotalBudgetRequest totalBudgetRequest,
+                                       @ModelAttribute("totalBudgetForm") TotalBudgetForm totalBudgetForm,
                                        Model model,
                                        RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            populateBudgetPage(model, totalBudgetRequest, request);
+            populateBudgetPage(model, totalBudgetForm, form);
             return "budgets";
         }
-        categoryBudgetService.create(request);
+        categoryBudgetService.create(toRequest(form));
         redirectAttributes.addFlashAttribute("successMessage", "Kategorie-Budget wurde gespeichert.");
         return "redirect:/budgets";
     }
@@ -70,7 +74,7 @@ public class BudgetPageController {
     public String editCategoryBudget(@PathVariable Long id, Model model) {
         CategoryBudgetResponse categoryBudget = categoryBudgetService.getById(id);
         model.addAttribute("categoryBudgetId", id);
-        model.addAttribute("categoryBudgetForm", CategoryBudgetRequest.builder()
+        model.addAttribute("categoryBudgetForm", CategoryBudgetForm.builder()
                 .categoryId(categoryBudget.getCategoryId())
                 .monthlyLimit(categoryBudget.getMonthlyLimit())
                 .build());
@@ -80,7 +84,7 @@ public class BudgetPageController {
 
     @PostMapping("/category/{id}")
     public String updateCategoryBudget(@PathVariable Long id,
-                                       @Valid @ModelAttribute("categoryBudgetForm") CategoryBudgetRequest request,
+                                       @Valid @ModelAttribute("categoryBudgetForm") CategoryBudgetForm form,
                                        BindingResult bindingResult,
                                        Model model,
                                        RedirectAttributes redirectAttributes) {
@@ -89,7 +93,7 @@ public class BudgetPageController {
             model.addAttribute("categories", categoryService.findAll());
             return "budget-category-edit";
         }
-        categoryBudgetService.update(id, request);
+        categoryBudgetService.update(id, toRequest(form));
         redirectAttributes.addFlashAttribute("successMessage", "Kategorie-Budget wurde aktualisiert.");
         return "redirect:/budgets";
     }
@@ -102,11 +106,24 @@ public class BudgetPageController {
     }
 
     private void populateBudgetPage(Model model,
-                                    TotalBudgetRequest totalBudgetRequest,
-                                    CategoryBudgetRequest categoryBudgetRequest) {
-        model.addAttribute("budgetSettings", categoryBudgetService.getBudgetSettingsPageData());
+                                    TotalBudgetForm totalBudgetForm,
+                                    CategoryBudgetForm categoryBudgetForm) {
+        model.addAttribute("budgetSettings", budgetSettingsQueryService.getViewModel());
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("totalBudgetForm", totalBudgetRequest);
-        model.addAttribute("categoryBudgetForm", categoryBudgetRequest);
+        model.addAttribute("totalBudgetForm", totalBudgetForm);
+        model.addAttribute("categoryBudgetForm", categoryBudgetForm);
+    }
+
+    private TotalBudgetRequest toRequest(TotalBudgetForm form) {
+        return TotalBudgetRequest.builder()
+                .totalMonthlyLimit(form.getTotalMonthlyLimit())
+                .build();
+    }
+
+    private CategoryBudgetRequest toRequest(CategoryBudgetForm form) {
+        return CategoryBudgetRequest.builder()
+                .categoryId(form.getCategoryId())
+                .monthlyLimit(form.getMonthlyLimit())
+                .build();
     }
 }
