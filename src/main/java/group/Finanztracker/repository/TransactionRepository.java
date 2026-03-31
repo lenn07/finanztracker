@@ -28,4 +28,31 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t where t.type = 'EXPENSE' and t.category.id = :categoryId")
     BigDecimal sumAmountofTransactionsByCategory(Long categoryId);
 
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.type = :type
+              AND t.date BETWEEN :startDate AND :endDate
+            """)
+    BigDecimal sumAmountByTypeAndDateBetween(TransactionType type, LocalDate startDate, LocalDate endDate);
+
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.type = 'EXPENSE'
+              AND t.category.id = :categoryId
+              AND t.date BETWEEN :startDate AND :endDate
+            """)
+    BigDecimal sumMonthlyExpensesByCategory(Long categoryId, LocalDate startDate, LocalDate endDate);
+
+    List<Transaction> findAllByDateBetweenOrderByDateDescIdDesc(LocalDate startDate, LocalDate endDate);
+
+    List<Transaction> findAllByOrderByDateDescIdDesc();
+
+    List<Transaction> findAllByCategory_IdOrderByDateDescIdDesc(Long categoryId);
+
+    List<Transaction> findAllByTypeOrderByDateDescIdDesc(TransactionType type);
+
+    boolean existsByCategory_Id(Long categoryId);
+
 }

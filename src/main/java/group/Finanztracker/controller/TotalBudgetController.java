@@ -34,9 +34,10 @@ public class TotalBudgetController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-	@PutMapping  
-	public ResponseEntity<TotalBudgetResponse> update(@Valid @RequestBody TotalBudgetRequest request) {
-		return ResponseEntity.ok(totalBudgetService.update(1L, request));
+	@PutMapping("/{id}")
+	public ResponseEntity<TotalBudgetResponse> update(@PathVariable Long id,
+													  @Valid @RequestBody TotalBudgetRequest request) {
+		return ResponseEntity.ok(totalBudgetService.update(id, request));
 	}
 
 	@DeleteMapping("/{id}")

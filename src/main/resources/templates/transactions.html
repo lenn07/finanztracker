@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaktionen | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <p class="eyebrow">Finanztracker</p>
+        <h1>Transaktionen</h1>
+    </div>
+    <nav class="main-nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/transactions}" class="active">Transaktionen</a>
+        <a th:href="@{/categories}">Kategorien</a>
+        <a th:href="@{/budgets}">Budgets</a>
+    </nav>
+</header>
+
+<main class="page two-column">
+    <section class="card">
+        <h2>Neue Transaktion</h2>
+        <p th:if="${successMessage}" class="message success" th:text="${successMessage}"></p>
+        <form method="post" th:action="@{/transactions(month=${selectedMonth}, type=${selectedType}, categoryId=${selectedCategoryId})}" th:object="${transactionForm}" class="stack-form">
+            <label for="title">Titel</label>
+            <input id="title" type="text" th:field="*{title}">
+            <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+
+            <label for="amount">Betrag</label>
+            <input id="amount" type="number" step="0.01" min="0.01" th:field="*{amount}">
+            <p class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+
+            <label for="type">Typ</label>
+            <select id="type" th:field="*{type}">
+                <option th:each="transactionType : ${transactionTypes}" th:value="${transactionType}" th:text="${transactionType}"></option>
+            </select>
+            <p class="field-error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></p>
+
+            <label for="categoryId">Kategorie</label>
+            <select id="categoryId" th:field="*{categoryId}">
+                <option value="">Bitte wählen</option>
+                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+            </select>
+            <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
+
+            <label for="date">Datum</label>
+            <input id="date" type="date" th:field="*{date}">
+            <p class="field-error" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></p>
+
+            <label for="note">Notiz</label>
+            <textarea id="note" rows="4" th:field="*{note}"></textarea>
+
+            <button type="submit">Speichern</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <div>
+                <h2>Monatsliste</h2>
+                <p>Filtere nach Monat, Typ oder Kategorie.</p>
+            </div>
+        </div>
+
+        <form method="get" th:action="@{/transactions}" class="filter-grid">
+            <div>
+                <label for="month">Monat</label>
+                <input id="month" type="month" name="month" th:value="${selectedMonth}">
+            </div>
+            <div>
+                <label for="filterType">Typ</label>
+                <select id="filterType" name="type">
+                    <option value="">Alle</option>
+                    <option th:each="transactionType : ${transactionTypes}"
+                            th:value="${transactionType}"
+                            th:text="${transactionType}"
+                            th:selected="${selectedType == transactionType}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="filterCategoryId">Kategorie</label>
+                <select id="filterCategoryId" name="categoryId">
+                    <option value="">Alle</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.id}"
+                            th:text="${category.name}"
+                            th:selected="${selectedCategoryId == category.id}"></option>
+                </select>
+            </div>
+            <button type="submit">Filtern</button>
+        </form>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Titel</th>
+                    <th>Kategorie</th>
+                    <th>Typ</th>
+                    <th>Betrag</th>
+                    <th>Aktionen</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="transaction : ${transactions}">
+                    <td th:text="${transaction.date}">2026-03-30</td>
+                    <td th:text="${transaction.title}">Gehalt</td>
+                    <td th:text="${transaction.categoryName}">Arbeit</td>
+                    <td th:text="${transaction.type}">INCOME</td>
+                    <td th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>
+                    <td class="actions">
+                        <a class="button-link secondary" th:href="@{/transactions/{id}/edit(id=${transaction.id})}">Bearbeiten</a>
+                        <form method="post" th:action="@{/transactions/{id}/delete(id=${transaction.id})}">
+                            <button class="danger-button" type="submit">Löschen</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(transactions)}">
+                    <td colspan="6">Für die gewählten Filter gibt es keine Transaktionen.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

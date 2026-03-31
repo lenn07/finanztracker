@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <p class="eyebrow">Finanztracker</p>
+        <h1>Monatsübersicht</h1>
+    </div>
+    <nav class="main-nav">
+        <a th:href="@{/dashboard}" class="active">Dashboard</a>
+        <a th:href="@{/transactions}">Transaktionen</a>
+        <a th:href="@{/categories}">Kategorien</a>
+        <a th:href="@{/budgets}">Budgets</a>
+    </nav>
+</header>
+
+<main class="page">
+    <section class="card">
+        <form method="get" th:action="@{/dashboard}" class="inline-form">
+            <label for="month">Monat</label>
+            <input id="month" type="month" name="month" th:value="${selectedMonth}">
+            <button type="submit">Anzeigen</button>
+        </form>
+        <p th:if="${successMessage}" class="message success" th:text="${successMessage}"></p>
+    </section>
+
+    <section class="metrics">
+        <article class="metric-card">
+            <span>Gesamtbudget</span>
+            <strong th:text="${#numbers.formatDecimal(overview.totalBudget, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
+        </article>
+        <article class="metric-card">
+            <span>Ausgaben</span>
+            <strong th:text="${#numbers.formatDecimal(overview.totalSpent, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
+        </article>
+        <article class="metric-card" th:classappend="${overview.overBudget} ? ' danger' : ' success'">
+            <span>Restbudget</span>
+            <strong th:text="${#numbers.formatDecimal(overview.remainingBudget, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
+        </article>
+        <article class="metric-card">
+            <span>Einnahmen</span>
+            <strong th:text="${#numbers.formatDecimal(overview.totalIncome, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
+        </article>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <div>
+                <h2>Kategorie-Budgets</h2>
+                <p>Feste Monatslimits werden gegen die Ausgaben dieses Monats geprüft.</p>
+            </div>
+            <p th:if="${overview.categoryBudgetSumExceedsTotalBudget}" class="message warning">
+                Die Summe deiner Kategorie-Budgets liegt über dem Gesamtbudget.
+            </p>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Kategorie</th>
+                    <th>Limit</th>
+                    <th>Ausgegeben</th>
+                    <th>Rest</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="category : ${overview.categories}">
+                    <td th:text="${category.categoryName}">Lebensmittel</td>
+                    <td>
+                        <span th:if="${category.hasBudget}" th:text="${#numbers.formatDecimal(category.monthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</span>
+                        <span th:if="${!category.hasBudget}">Kein Limit</span>
+                    </td>
+                    <td th:text="${#numbers.formatDecimal(category.spent, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>
+                    <td>
+                        <span th:if="${category.hasBudget}" th:text="${#numbers.formatDecimal(category.remaining, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</span>
+                        <span th:if="${!category.hasBudget}">-</span>
+                    </td>
+                    <td>
+                        <span class="pill neutral" th:if="${!category.hasBudget}">Offen</span>
+                        <span class="pill success" th:if="${category.hasBudget and !category.overLimit}">Im Rahmen</span>
+                        <span class="pill danger" th:if="${category.hasBudget and category.overLimit}">Überschritten</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(overview.categories)}">
+                    <td colspan="5">Noch keine Kategorien vorhanden.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <div>
+                <h2>Transaktionen im Monat</h2>
+                <p>Die Liste zeigt alle Einträge mit dem ausgewählten Monatsdatum.</p>
+            </div>
+            <a class="button-link" th:href="@{/transactions(month=${selectedMonth})}">Zur Verwaltung</a>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Titel</th>
+                    <th>Kategorie</th>
+                    <th>Typ</th>
+                    <th>Betrag</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="transaction : ${transactions}">
+                    <td th:text="${transaction.date}">2026-03-30</td>
+                    <td th:text="${transaction.title}">Supermarkt</td>
+                    <td th:text="${transaction.categoryName}">Lebensmittel</td>
+                    <td th:text="${transaction.type}">EXPENSE</td>
+                    <td th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(transactions)}">
+                    <td colspan="5">Für diesen Monat gibt es noch keine Transaktionen.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

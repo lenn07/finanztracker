@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -27,25 +28,25 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
 
     public List<TransactionResponse> findAll() {
-        return transactionRepository.findAll().stream()
+        return transactionRepository.findAllByOrderByDateDescIdDesc().stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 
     public List<TransactionResponse> findAllByCategoryId(Long categoryId) {
-        return transactionRepository.findAllByCategory_Id(categoryId).stream()
+        return transactionRepository.findAllByCategory_IdOrderByDateDescIdDesc(categoryId).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 
     public List<TransactionResponse> findAllByDateRange(LocalDate startDate, LocalDate endDate) {
-        return transactionRepository.findAllByDateBetween(startDate, endDate).stream()
+        return transactionRepository.findAllByDateBetweenOrderByDateDescIdDesc(startDate, endDate).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 
     public List<TransactionResponse> findAllByType(TransactionType type) {
-        return transactionRepository.findAllByType(type).stream()
+        return transactionRepository.findAllByTypeOrderByDateDescIdDesc(type).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
@@ -56,6 +57,34 @@ public class TransactionService {
 
     public BigDecimal sumAmountOfTransactionsByCategory(Long categoryId) {
         return transactionRepository.sumAmountofTransactionsByCategory(categoryId);
+    }
+
+    public BigDecimal sumExpensesForMonth(YearMonth month) {
+        return transactionRepository.sumAmountByTypeAndDateBetween(
+                TransactionType.EXPENSE,
+                month.atDay(1),
+                month.atEndOfMonth()
+        );
+    }
+
+    public BigDecimal sumIncomeForMonth(YearMonth month) {
+        return transactionRepository.sumAmountByTypeAndDateBetween(
+                TransactionType.INCOME,
+                month.atDay(1),
+                month.atEndOfMonth()
+        );
+    }
+
+    public BigDecimal sumExpensesForCategoryAndMonth(Long categoryId, YearMonth month) {
+        return transactionRepository.sumMonthlyExpensesByCategory(
+                categoryId,
+                month.atDay(1),
+                month.atEndOfMonth()
+        );
+    }
+
+    public List<TransactionResponse> findAllForMonth(YearMonth month) {
+        return findAllByDateRange(month.atDay(1), month.atEndOfMonth());
     }
 
     public TransactionResponse findById(Long id) {

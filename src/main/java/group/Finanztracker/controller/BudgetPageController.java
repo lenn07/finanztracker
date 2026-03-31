@@ -1,0 +1,112 @@
+package group.Finanztracker.controller;
+
+import group.Finanztracker.dto.CategoryBudgetRequest;
+import group.Finanztracker.dto.CategoryBudgetResponse;
+import group.Finanztracker.dto.TotalBudgetRequest;
+import group.Finanztracker.service.CategoryBudgetService;
+import group.Finanztracker.service.CategoryService;
+import group.Finanztracker.service.TotalBudgetService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequestMapping("/budgets")
+@RequiredArgsConstructor
+public class BudgetPageController {
+
+    private final TotalBudgetService totalBudgetService;
+    private final CategoryBudgetService categoryBudgetService;
+    private final CategoryService categoryService;
+
+    @GetMapping
+    public String budgets(Model model) {
+        populateBudgetPage(model, new TotalBudgetRequest(), new CategoryBudgetRequest());
+        totalBudgetService.getCurrentBudget()
+                .ifPresent(budget -> model.addAttribute("totalBudgetForm",
+                        TotalBudgetRequest.builder().totalMonthlyLimit(budget.getTotalMonthlyLimit()).build()));
+        return "budgets";
+    }
+
+    @PostMapping("/total")
+    public String saveTotalBudget(@Valid @ModelAttribute("totalBudgetForm") TotalBudgetRequest request,
+                                  BindingResult bindingResult,
+                                  @ModelAttribute("categoryBudgetForm") CategoryBudgetRequest categoryBudgetRequest,
+                                  Model model,
+                                  RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            populateBudgetPage(model, request, categoryBudgetRequest);
+            return "budgets";
+        }
+        totalBudgetService.saveOrUpdate(request);
+        redirectAttributes.addFlashAttribute("successMessage", "Gesamtbudget wurde gespeichert.");
+        return "redirect:/budgets";
+    }
+
+    @PostMapping("/category")
+    public String createCategoryBudget(@Valid @ModelAttribute("categoryBudgetForm") CategoryBudgetRequest request,
+                                       BindingResult bindingResult,
+                                       @ModelAttribute("totalBudgetForm") TotalBudgetRequest totalBudgetRequest,
+                                       Model model,
+                                       RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            populateBudgetPage(model, totalBudgetRequest, request);
+            return "budgets";
+        }
+        categoryBudgetService.create(request);
+        redirectAttributes.addFlashAttribute("successMessage", "Kategorie-Budget wurde gespeichert.");
+        return "redirect:/budgets";
+    }
+
+    @GetMapping("/category/{id}/edit")
+    public String editCategoryBudget(@PathVariable Long id, Model model) {
+        CategoryBudgetResponse categoryBudget = categoryBudgetService.getById(id);
+        model.addAttribute("categoryBudgetId", id);
+        model.addAttribute("categoryBudgetForm", CategoryBudgetRequest.builder()
+                .categoryId(categoryBudget.getCategoryId())
+                .monthlyLimit(categoryBudget.getMonthlyLimit())
+                .build());
+        model.addAttribute("categories", categoryService.findAll());
+        return "budget-category-edit";
+    }
+
+    @PostMapping("/category/{id}")
+    public String updateCategoryBudget(@PathVariable Long id,
+                                       @Valid @ModelAttribute("categoryBudgetForm") CategoryBudgetRequest request,
+                                       BindingResult bindingResult,
+                                       Model model,
+                                       RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categoryBudgetId", id);
+            model.addAttribute("categories", categoryService.findAll());
+            return "budget-category-edit";
+        }
+        categoryBudgetService.update(id, request);
+        redirectAttributes.addFlashAttribute("successMessage", "Kategorie-Budget wurde aktualisiert.");
+        return "redirect:/budgets";
+    }
+
+    @PostMapping("/category/{id}/delete")
+    public String deleteCategoryBudget(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        categoryBudgetService.delete(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Kategorie-Budget wurde gelöscht.");
+        return "redirect:/budgets";
+    }
+
+    private void populateBudgetPage(Model model,
+                                    TotalBudgetRequest totalBudgetRequest,
+                                    CategoryBudgetRequest categoryBudgetRequest) {
+        model.addAttribute("budgetSettings", categoryBudgetService.getBudgetSettingsPageData());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("totalBudgetForm", totalBudgetRequest);
+        model.addAttribute("categoryBudgetForm", categoryBudgetRequest);
+    }
+}

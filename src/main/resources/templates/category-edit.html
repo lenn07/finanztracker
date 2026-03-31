@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategorie bearbeiten | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <p class="eyebrow">Finanztracker</p>
+        <h1>Kategorie bearbeiten</h1>
+    </div>
+    <nav class="main-nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/transactions}">Transaktionen</a>
+        <a th:href="@{/categories}" class="active">Kategorien</a>
+        <a th:href="@{/budgets}">Budgets</a>
+    </nav>
+</header>
+
+<main class="page single-column">
+    <section class="card narrow">
+        <form method="post" th:action="@{/categories/{id}(id=${categoryId})}" th:object="${categoryForm}" class="stack-form">
+            <label for="name">Name</label>
+            <input id="name" type="text" th:field="*{name}">
+            <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+            <div class="actions-row">
+                <button type="submit">Aktualisieren</button>
+                <a class="button-link secondary" th:href="@{/categories}">Zurück</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

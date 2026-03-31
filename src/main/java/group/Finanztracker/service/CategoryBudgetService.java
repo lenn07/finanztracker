@@ -2,16 +2,19 @@ package group.Finanztracker.service;
 
 import group.Finanztracker.dto.CategoryBudgetRequest;
 import group.Finanztracker.dto.CategoryBudgetResponse;
+import group.Finanztracker.dto.BudgetSettingsPageData;
 import group.Finanztracker.entity.Category;
 import group.Finanztracker.entity.CategoryBudget;
 import group.Finanztracker.exception.ResourceNotFoundException;
 import group.Finanztracker.mapper.CategoryBudgetMapper;
 import group.Finanztracker.repository.CategoryBudgetRepository;
 import group.Finanztracker.repository.CategoryRepository;
+import group.Finanztracker.repository.TotalBudgetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -20,11 +23,12 @@ public class CategoryBudgetService {
 
 	private final CategoryBudgetRepository categoryBudgetRepository;
 	private final CategoryRepository categoryRepository;
+	private final TotalBudgetRepository totalBudgetRepository;
 	private final CategoryBudgetMapper categoryBudgetMapper;
 
 	@Transactional(readOnly = true)
 	public List<CategoryBudgetResponse> getAll() {
-		return categoryBudgetRepository.findAll().stream()
+		return categoryBudgetRepository.findAllByOrderByCategory_NameAsc().stream()
 				.map(categoryBudgetMapper::toResponse)
 				.toList();
 	}
@@ -54,6 +58,11 @@ public class CategoryBudgetService {
 				.orElseThrow(() -> new ResourceNotFoundException("CategoryBudget not found with id: " + id));
 		Category category = categoryRepository.findById(request.getCategoryId())
 				.orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
+		categoryBudgetRepository.findByCategory(category)
+				.filter(existing -> !existing.getId().equals(id))
+				.ifPresent(existing -> {
+					throw new IllegalStateException("Für diese Kategorie existiert bereits ein Budget.");
+				});
 		categoryBudgetMapper.updateEntity(entity, request, category);
 		entity = categoryBudgetRepository.save(entity);
 		return categoryBudgetMapper.toResponse(entity);
@@ -65,5 +74,28 @@ public class CategoryBudgetService {
 			throw new ResourceNotFoundException("CategoryBudget not found with id: " + id);
 		}
 		categoryBudgetRepository.deleteById(id);
+	}
+
+	@Transactional(readOnly = true)
+	public BudgetSettingsPageData getBudgetSettingsPageData() {
+		BigDecimal totalBudget = totalBudgetRepository.findFirstByOrderByIdAsc()
+				.map(total -> total.getTotalMonthlyLimit())
+				.orElse(BigDecimal.ZERO);
+		BigDecimal configuredCategoryBudgetSum = getConfiguredCategoryBudgetSum();
+		return BudgetSettingsPageData.builder()
+				.totalBudgetId(totalBudgetRepository.findFirstByOrderByIdAsc().map(total -> total.getId()).orElse(null))
+				.totalMonthlyLimit(totalBudget)
+				.configuredCategoryBudgetSum(configuredCategoryBudgetSum)
+				.categoryBudgetSumExceedsTotalBudget(totalBudget.compareTo(BigDecimal.ZERO) > 0
+						&& configuredCategoryBudgetSum.compareTo(totalBudget) > 0)
+				.categoryBudgets(getAll())
+				.build();
+	}
+
+	@Transactional(readOnly = true)
+	public BigDecimal getConfiguredCategoryBudgetSum() {
+		return categoryBudgetRepository.findAll().stream()
+				.map(CategoryBudget::getMonthlyLimit)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 }

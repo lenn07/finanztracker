@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fehler | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page single-column">
+    <section class="card narrow">
+        <p class="eyebrow">Finanztracker</p>
+        <h1>Etwas hat nicht funktioniert</h1>
+        <p class="message danger" th:text="${errorMessage}">Ein Fehler ist aufgetreten.</p>
+        <div class="actions-row">
+            <a class="button-link" th:href="@{/dashboard}">Zum Dashboard</a>
+            <a class="button-link secondary" href="javascript:history.back()">Zurück</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

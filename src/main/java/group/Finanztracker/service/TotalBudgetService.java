@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class TotalBudgetService {
 
 	@Transactional
 	public TotalBudgetResponse create(TotalBudgetRequest request) {
-        if (!totalBudgetRepository.findAll().isEmpty()) {
+        if (totalBudgetRepository.findFirstByOrderByIdAsc().isPresent()) {
             throw new IllegalStateException("Es existiert bereits ein Gesamtbudget. Mehrere Gesamtbudgets sind nicht erlaubt.");
         }
         TotalBudget entity = totalBudgetMapper.toEntity(request);
@@ -58,5 +60,25 @@ public class TotalBudgetService {
 			throw new ResourceNotFoundException("TotalBudget not found with id: " + id);
 		}
 		totalBudgetRepository.deleteById(id);
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<TotalBudgetResponse> getCurrentBudget() {
+		return totalBudgetRepository.findFirstByOrderByIdAsc()
+				.map(totalBudgetMapper::toResponse);
+	}
+
+	@Transactional(readOnly = true)
+	public BigDecimal getCurrentBudgetLimit() {
+		return totalBudgetRepository.findFirstByOrderByIdAsc()
+				.map(TotalBudget::getTotalMonthlyLimit)
+				.orElse(BigDecimal.ZERO);
+	}
+
+	@Transactional
+	public TotalBudgetResponse saveOrUpdate(TotalBudgetRequest request) {
+		return totalBudgetRepository.findFirstByOrderByIdAsc()
+				.map(existing -> update(existing.getId(), request))
+				.orElseGet(() -> create(request));
 	}
 }

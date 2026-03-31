@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategorien | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <p class="eyebrow">Finanztracker</p>
+        <h1>Kategorien</h1>
+    </div>
+    <nav class="main-nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/transactions}">Transaktionen</a>
+        <a th:href="@{/categories}" class="active">Kategorien</a>
+        <a th:href="@{/budgets}">Budgets</a>
+    </nav>
+</header>
+
+<main class="page two-column">
+    <section class="card">
+        <h2>Neue Kategorie</h2>
+        <p th:if="${successMessage}" class="message success" th:text="${successMessage}"></p>
+        <form method="post" th:action="@{/categories}" th:object="${categoryForm}" class="stack-form">
+            <label for="name">Name</label>
+            <input id="name" type="text" th:field="*{name}">
+            <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+            <button type="submit">Kategorie anlegen</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Vorhandene Kategorien</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Aktionen</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="category : ${categories}">
+                    <td th:text="${category.name}">Lebensmittel</td>
+                    <td class="actions">
+                        <a class="button-link secondary" th:href="@{/categories/{id}/edit(id=${category.id})}">Bearbeiten</a>
+                        <form method="post" th:action="@{/categories/{id}/delete(id=${category.id})}">
+                            <button class="danger-button" type="submit">Löschen</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(categories)}">
+                    <td colspan="2">Noch keine Kategorien vorhanden.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>
