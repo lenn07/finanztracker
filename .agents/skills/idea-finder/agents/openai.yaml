@@ -1,0 +1,4 @@
+interface:
+  display_name: "Idea Finder"
+  short_description: "Diskutiert Produktideen ohne Codeaenderung"
+  default_prompt: "Use $idea-finder to explore ideas that could improve, extend, or make this project more useful without changing code."

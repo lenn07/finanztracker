@@ -39,6 +39,7 @@ Wichtig: Budgets werden aktuell nur gegen `EXPENSE`-Transaktionen gerechnet. Ein
 - `src/main/resources/templates`: Thymeleaf-Views
 - `src/main/resources/static/css`: Styles
 - `src/main/resources/db/migration`: Flyway-Migrationen
+- `.agents/skills`: Projektlokale Codex-Skills fuer wiederkehrende Arbeitsablaeufe
 
 ## Voraussetzungen
 - Java 17
@@ -136,3 +137,10 @@ Aktuell sind vor allem Unit-Tests fuer Geschaeftsregeln enthalten, zum Beispiel:
 - `.mvn/` gehoert normalerweise ins Repository, weil dort die Maven-Wrapper-Konfiguration liegt.
 - `.m2/` ist ein lokaler Maven-Cache und sollte nicht mitgepusht werden.
 - `target/` sollte ebenfalls nicht versioniert werden.
+
+## Codex-Skills
+- Der projektlokale Skill `implement-feature` liegt unter `.agents/skills/implement-feature`.
+- Er fuehrt Feature-Arbeit entlang dieses Ablaufs: betroffene Komponenten finden, Implementierungsplan ableiten, bei echten Unklarheiten rueckfragen, Aenderungen klein halten, README pruefen und eine kurze Summary liefern.
+- Tests werden durch diesen Skill nicht ungefragt ergaenzt oder ausgefuehrt.
+- Der projektlokale Skill `idea-finder` liegt unter `.agents/skills/idea-finder`.
+- Er hilft dabei, Verbesserungs- und Erweiterungsideen fuer das Projekt zu sammeln, zu bewerten und zu priorisieren, ohne Code oder Dateien zu aendern.
