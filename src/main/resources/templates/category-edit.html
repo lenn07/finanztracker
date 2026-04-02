@@ -8,16 +8,30 @@
 </head>
 <body>
 <header class="site-header">
-    <div>
+    <div class="header-brand">
         <p class="eyebrow">Finanztracker</p>
         <h1>Kategorie bearbeiten</h1>
     </div>
-    <nav class="main-nav">
-        <a th:href="@{/dashboard}">Dashboard</a>
+    <div class="header-actions">
+        <nav class="main-nav">
+            <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/transactions}">Transaktionen</a>
         <a th:href="@{/categories}" class="active">Kategorien</a>
         <a th:href="@{/budgets}">Budgets</a>
-    </nav>
+        </nav>
+        <details class="account-menu" th:if="${userLoggedIn}">
+            <summary class="account-trigger">
+                <span class="account-trigger-label">Konto</span>
+                <span class="account-trigger-icon" aria-hidden="true">v</span>
+            </summary>
+            <div class="account-panel">
+                <p class="account-email" th:text="${currentUserEmail}">user@example.com</p>
+                <form method="post" th:action="@{/auth/logout}">
+                    <button class="button-link secondary logout-button" type="submit">Abmelden</button>
+                </form>
+            </div>
+        </details>
+    </div>
 </header>
 
 <main class="page single-column">

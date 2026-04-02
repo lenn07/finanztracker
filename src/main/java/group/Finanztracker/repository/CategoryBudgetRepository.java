@@ -10,7 +10,9 @@ import java.util.List;
 
 @Repository
 public interface CategoryBudgetRepository extends JpaRepository<CategoryBudget, Long> {
-	Optional<CategoryBudget> findByCategory(Category category);
-	List<CategoryBudget> findAllByOrderByCategory_NameAsc();
+	Optional<CategoryBudget> findByCategoryAndCategory_User_Id(Category category, Long userId);
+	List<CategoryBudget> findAllByCategory_User_IdOrderByCategory_NameAsc(Long userId);
+	List<CategoryBudget> findAllByCategory_User_Id(Long userId);
+	Optional<CategoryBudget> findByIdAndCategory_User_Id(Long id, Long userId);
 	void deleteByCategory(Category category);
 }

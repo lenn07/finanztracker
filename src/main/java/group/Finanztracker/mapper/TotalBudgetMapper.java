@@ -3,14 +3,16 @@ package group.Finanztracker.mapper;
 import group.Finanztracker.dto.TotalBudgetRequest;
 import group.Finanztracker.dto.TotalBudgetResponse;
 import group.Finanztracker.entity.TotalBudget;
+import group.Finanztracker.entity.security.AppUser;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TotalBudgetMapper {
 
-    public TotalBudget toEntity(TotalBudgetRequest request) {
+    public TotalBudget toEntity(TotalBudgetRequest request, AppUser user) {
         return TotalBudget.builder()
                 .totalMonthlyLimit(request.getTotalMonthlyLimit())
+                .user(user)
                 .build();
     }
 

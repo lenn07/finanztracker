@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anmelden | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page single-column auth-page">
+    <section class="card narrow auth-card">
+        <div class="auth-header">
+            <p class="eyebrow">Finanztracker</p>
+            <h1>Anmelden</h1>
+            <p>Logge dich mit deinem bestaetigten Konto ein.</p>
+        </div>
+
+        <p th:if="${param.logout}" class="message success">Du wurdest erfolgreich abgemeldet.</p>
+        <p th:if="${param.error}" class="message danger">Die Anmeldung war nicht erfolgreich. Bitte pruefe deine Daten.</p>
+        <p th:if="${param.unverified}" class="message warning">Bitte bestaetige zuerst deine E-Mail-Adresse.</p>
+        <p th:if="${successMessage}" class="message success" th:text="${successMessage}"></p>
+        <p th:if="${dangerMessage}" class="message danger" th:text="${dangerMessage}"></p>
+
+        <form method="post" th:action="@{/auth/login}" class="stack-form">
+            <label for="username">E-Mail</label>
+            <input id="username" name="username" type="email" autocomplete="username">
+
+            <label for="password">Passwort</label>
+            <input id="password" name="password" type="password" autocomplete="current-password">
+
+            <label class="checkbox-row" for="remember-me">
+                <input id="remember-me" name="remember-me" type="checkbox">
+                <span>Angemeldet bleiben</span>
+            </label>
+
+            <button type="submit">Anmelden</button>
+        </form>
+
+        <div class="auth-divider"></div>
+
+        <section class="auth-support">
+            <h2>Noch kein Konto?</h2>
+            <a class="button-link secondary" th:href="@{/auth/register}">Jetzt registrieren</a>
+        </section>
+
+        <section class="auth-support">
+            <h2>Bestaetigungsmail erneut senden</h2>
+            <form method="post" th:action="@{/auth/resend-verification}" th:object="${resendVerificationForm}" class="stack-form">
+                <label for="resend-email">E-Mail</label>
+                <input id="resend-email" type="email" th:field="*{email}">
+                <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+                <button type="submit">Bestaetigungslink senden</button>
+            </form>
+        </section>
+    </section>
+</main>
+</body>
+</html>

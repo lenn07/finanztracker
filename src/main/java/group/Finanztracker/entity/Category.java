@@ -1,5 +1,6 @@
 package group.Finanztracker.entity;
 
+import group.Finanztracker.entity.security.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,8 +17,12 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id")
+    private AppUser user;
 
     /*@OneToMany(mappedBy = "category")
     @Builder.Default

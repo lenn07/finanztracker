@@ -6,6 +6,8 @@ import group.Finanztracker.mapper.CategoryMapper;
 import group.Finanztracker.repository.CategoryBudgetRepository;
 import group.Finanztracker.repository.CategoryRepository;
 import group.Finanztracker.repository.TransactionRepository;
+import group.Finanztracker.repository.security.AppUserRepository;
+import group.Finanztracker.service.security.CurrentUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,10 @@ class CategoryServiceTest {
     private CategoryBudgetRepository categoryBudgetRepository;
     @Mock
     private TransactionRepository transactionRepository;
+    @Mock
+    private CurrentUserService currentUserService;
+    @Mock
+    private AppUserRepository appUserRepository;
 
     private CategoryService categoryService;
 
@@ -37,15 +43,18 @@ class CategoryServiceTest {
                 categoryRepository,
                 categoryBudgetRepository,
                 transactionRepository,
-                new CategoryMapper()
+                new CategoryMapper(),
+                currentUserService,
+                appUserRepository
         );
     }
 
     @Test
     void shouldRejectDeleteWhenTransactionsStillExist() {
         Category category = Category.builder().id(7L).name("Freizeit").build();
-        when(categoryRepository.findById(7L)).thenReturn(Optional.of(category));
-        when(transactionRepository.existsByCategory_Id(7L)).thenReturn(true);
+        when(currentUserService.getCurrentUserId()).thenReturn(11L);
+        when(categoryRepository.findByIdAndUser_Id(7L, 11L)).thenReturn(Optional.of(category));
+        when(transactionRepository.existsByCategory_IdAndCategory_User_Id(7L, 11L)).thenReturn(true);
 
         assertThatThrownBy(() -> categoryService.delete(7L))
                 .isInstanceOf(IllegalStateException.class)
@@ -56,7 +65,8 @@ class CategoryServiceTest {
 
     @Test
     void shouldRejectCreateForDuplicateNameIgnoringCase() {
-        when(categoryRepository.findByNameIgnoreCase("lebensmittel"))
+        when(currentUserService.getCurrentUserId()).thenReturn(11L);
+        when(categoryRepository.findByUser_IdAndNameIgnoreCase(11L, "lebensmittel"))
                 .thenReturn(Optional.of(Category.builder().id(1L).name("Lebensmittel").build()));
 
         assertThatThrownBy(() -> categoryService.create(CategoryRequest.builder().name("lebensmittel").build()))

@@ -2,11 +2,22 @@ package group.Finanztracker.repository;
 
 import group.Finanztracker.entity.TotalBudget;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
 public interface TotalBudgetRepository extends JpaRepository<TotalBudget, Long> {
-    Optional<TotalBudget> findFirstByOrderByIdAsc();
+    Optional<TotalBudget> findFirstByUser_IdOrderByIdAsc(Long userId);
+    Optional<TotalBudget> findByIdAndUser_Id(Long id, Long userId);
+
+    @Modifying
+    @Query(value = """
+            update budget_settings
+            set user_id = :userId
+            where user_id is null
+            """, nativeQuery = true)
+    int assignUserToOrphanedBudgets(Long userId);
 }

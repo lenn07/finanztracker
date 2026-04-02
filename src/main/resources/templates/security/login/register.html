@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrieren | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page single-column auth-page">
+    <section class="card narrow auth-card">
+        <div class="auth-header">
+            <p class="eyebrow">Finanztracker</p>
+            <h1>Konto erstellen</h1>
+            <p>Lege dein Konto an und bestaetige es danach per E-Mail.</p>
+        </div>
+
+        <form method="post" th:action="@{/auth/register}" th:object="${registrationForm}" class="stack-form">
+            <label for="email">E-Mail</label>
+            <input id="email" type="email" th:field="*{email}" autocomplete="email">
+            <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+
+            <label for="password">Passwort</label>
+            <input id="password" type="password" th:field="*{password}" autocomplete="new-password">
+            <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+
+            <label for="confirmPassword">Passwort bestaetigen</label>
+            <input id="confirmPassword" type="password" th:field="*{confirmPassword}" autocomplete="new-password">
+            <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></p>
+
+            <button type="submit">Konto erstellen</button>
+        </form>
+
+        <div class="auth-divider"></div>
+
+        <div class="actions-row">
+            <a class="button-link secondary" th:href="@{/auth/login}">Zur Anmeldung</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

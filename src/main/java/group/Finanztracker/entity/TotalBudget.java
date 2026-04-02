@@ -1,5 +1,6 @@
 package group.Finanztracker.entity;
 
+import group.Finanztracker.entity.security.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -19,4 +20,8 @@ public class TotalBudget {
 
 	@Column(name = "total_monthly_limit", nullable = false, precision = 12, scale = 2)
 	private BigDecimal totalMonthlyLimit;
+
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "user_id")
+	private AppUser user;
 }

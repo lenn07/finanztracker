@@ -6,6 +6,7 @@ import group.Finanztracker.entity.Category;
 import group.Finanztracker.entity.CategoryBudget;
 import group.Finanztracker.repository.CategoryBudgetRepository;
 import group.Finanztracker.repository.CategoryRepository;
+import group.Finanztracker.service.security.CurrentUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,8 @@ class MonthlyOverviewServiceTest {
     private TransactionService transactionService;
     @Mock
     private TotalBudgetService totalBudgetService;
+    @Mock
+    private CurrentUserService currentUserService;
 
     private MonthlyOverviewService monthlyOverviewService;
 
@@ -44,7 +47,8 @@ class MonthlyOverviewServiceTest {
                 categoryBudgetRepository,
                 transactionService,
                 totalBudgetService,
-                clock
+                clock,
+                currentUserService
         );
     }
 
@@ -59,8 +63,9 @@ class MonthlyOverviewServiceTest {
                 .monthlyLimit(new BigDecimal("300.00"))
                 .build();
 
-        when(categoryRepository.findAllByOrderByNameAsc()).thenReturn(List.of(salary, groceries));
-        when(categoryBudgetRepository.findAll()).thenReturn(List.of(groceriesBudget));
+        when(currentUserService.getCurrentUserId()).thenReturn(11L);
+        when(categoryRepository.findAllByUser_IdOrderByNameAsc(11L)).thenReturn(List.of(salary, groceries));
+        when(categoryBudgetRepository.findAllByCategory_User_Id(11L)).thenReturn(List.of(groceriesBudget));
         when(totalBudgetService.getCurrentBudgetLimit()).thenReturn(new BigDecimal("1000.00"));
         when(transactionService.sumExpensesForMonth(month)).thenReturn(new BigDecimal("350.00"));
         when(transactionService.sumIncomeForMonth(month)).thenReturn(new BigDecimal("2500.00"));

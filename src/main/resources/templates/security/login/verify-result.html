@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Mail bestaetigen | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page single-column auth-page">
+    <section class="card narrow auth-card">
+        <p class="eyebrow">Finanztracker</p>
+        <h1 th:text="${verificationSucceeded} ? 'Bestaetigung erfolgreich' : 'Bestaetigung fehlgeschlagen'">Bestaetigung</h1>
+        <p class="message" th:classappend="${verificationSucceeded} ? ' success' : ' danger'" th:text="${verificationMessage}"></p>
+        <div class="actions-row">
+            <a class="button-link" th:href="@{/auth/login}">Zur Anmeldung</a>
+            <a class="button-link secondary" th:href="@{/auth/register}">Neu registrieren</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

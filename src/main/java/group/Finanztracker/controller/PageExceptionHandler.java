@@ -1,6 +1,7 @@
 package group.Finanztracker.controller;
 
 import group.Finanztracker.exception.ResourceNotFoundException;
+import group.Finanztracker.controller.security.AuthPageController;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
         DashboardPageController.class,
         TransactionPageController.class,
         CategoryPageController.class,
-        BudgetPageController.class
+        BudgetPageController.class,
+        AuthPageController.class
 })
 public class PageExceptionHandler {
 

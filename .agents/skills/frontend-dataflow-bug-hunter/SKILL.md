@@ -7,12 +7,23 @@ description: Pruefe und verbessere Frontend-nahe Bugs in einem Spring-Boot-Webpr
 
 Pruefe UI-Bugs, Formularfehler und Datenflussprobleme zwischen Frontend und Backend.
 
+Arbeite immer in einem von zwei Modi:
+
+- `Bericht`: Analysiere, finde Bugs und Risiken und schreibe nur einen Bericht. Nimm keine Dateiaenderungen vor.
+- `Direkte Aenderung`: Analysiere wie bisher und behebe sichere, lokale Fehler direkt.
+
+Bestimme den Modus so:
+
+- Wenn der Nutzer explizit `Bericht`, `nur Bericht`, `nur pruefen`, `Review` oder aehnlich verlangt, arbeite im Modus `Bericht`.
+- Wenn der Nutzer explizit `Direkte Aenderung`, `direkt beheben`, `aendern`, `fixen` oder aehnlich verlangt, arbeite im Modus `Direkte Aenderung`.
+- Wenn der Nutzer keinen Modus nennt, nutze standardmaessig `Direkte Aenderung`, damit die bisherige Funktion erhalten bleibt.
+
 Arbeite in dieser Reihenfolge:
 
 1. Untersuche Templates, Page-Controller, Form-DTOs, Request-DTOs, Mapper und Service-Aufrufe.
 2. Verfolge den Datenfluss von Eingabe im Frontend bis zur Verarbeitung im Backend und zur Rueckgabe ins Frontend.
 3. Finde Inkonsistenzen bei Feldnamen, Binding, Validation, Redirects, Model-Attributen und Anzeigeformaten.
-4. Behebe sichere, lokale Fehler direkt.
+4. Behebe sichere, lokale Fehler direkt, aber nur im Modus `Direkte Aenderung`.
 5. Stoppe bei groesseren Architekturentscheidungen und benenne die Ursache klar.
 
 Pruefe insbesondere diese Fehlerklassen:
@@ -38,7 +49,7 @@ Nutze fuer die Bewertung diese Regeln:
 - Redirects sollen benoetigten UI-Kontext wie Filter oder Monat nicht unbeabsichtigt verlieren.
 - Zahlen-, Datums- und Enum-Werte muessen in UI, Binding und Backend konsistent formatiert und geparst werden.
 
-Erlaube direkte Anpassungen ohne Rueckfrage, wenn sie lokal und sicher sind:
+Im Modus `Direkte Aenderung` erlaube direkte Anpassungen ohne Rueckfrage, wenn sie lokal und sicher sind:
 
 - fehlende oder falsche Model-Attribute nachziehen
 - inkonsistente Feldnamen zwischen Template und DTO angleichen
@@ -46,6 +57,8 @@ Erlaube direkte Anpassungen ohne Rueckfrage, wenn sie lokal und sicher sind:
 - Redirect-Parameter oder Flash-Messages konsistent machen
 - kleine Mapping- oder Binding-Fehler korrigieren
 - offensichtliche Anzeige- oder Formularbugs im Template bereinigen
+
+Im Modus `Bericht` analysierst du dieselben Punkte, setzt aber keine Aenderungen um.
 
 Stoppe und erklaere das Risiko statt direkt umzubauen, wenn:
 
@@ -58,6 +71,7 @@ Wenn du antwortest:
 
 - Nenne zuerst konkrete Bugs oder Risiken.
 - Referenziere die betroffenen Dateien.
+- Sage explizit, in welchem Modus du gearbeitet hast.
 - Sage explizit, welche Fehler nur analysiert und welche du direkt behoben hast.
 - Trenne UI-Bugs, Binding-/Transfer-Bugs und groessere Strukturprobleme voneinander.
 

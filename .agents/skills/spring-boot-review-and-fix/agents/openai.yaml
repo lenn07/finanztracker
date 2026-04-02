@@ -1,7 +1,0 @@
-interface:
-  display_name: "Spring Boot Review And Fix"
-  short_description: "Prueft Code und behebt sichere Verstoesse."
-  default_prompt: "Nutze $spring-boot-review-and-fix, um dieses Spring-Boot-Projekt auf Schichten, DTO-Grenzen und uebliche Konventionen zu pruefen und sichere Verstoesse direkt durch kleine Refactorings zu beheben."
-
-policy:
-  allow_implicit_invocation: true

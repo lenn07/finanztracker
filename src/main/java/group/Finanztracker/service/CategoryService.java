@@ -8,6 +8,8 @@ import group.Finanztracker.mapper.CategoryMapper;
 import group.Finanztracker.repository.CategoryBudgetRepository;
 import group.Finanztracker.repository.CategoryRepository;
 import group.Finanztracker.repository.TransactionRepository;
+import group.Finanztracker.repository.security.AppUserRepository;
+import group.Finanztracker.service.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,9 +25,11 @@ public class CategoryService {
     private final CategoryBudgetRepository categoryBudgetRepository;
     private final TransactionRepository transactionRepository;
     private final CategoryMapper categoryMapper;
+    private final CurrentUserService currentUserService;
+    private final AppUserRepository appUserRepository;
 
     public List<CategoryResponse> findAll() {
-        return categoryRepository.findAllByOrderByNameAsc().stream()
+        return categoryRepository.findAllByUser_IdOrderByNameAsc(currentUserService.getCurrentUserId()).stream()
                 .map(categoryMapper::toResponse)
                 .toList();
     }
@@ -37,8 +41,13 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
+        Long userId = currentUserService.getCurrentUserId();
         validateUniqueName(request.getName(), null);
-        Category category = categoryMapper.toEntity(request);
+        Category category = categoryMapper.toEntity(
+                request,
+                appUserRepository.findById(userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Benutzer nicht gefunden"))
+        );
         Category saved = categoryRepository.save(category);
         return categoryMapper.toResponse(saved);
     }
@@ -54,22 +63,23 @@ public class CategoryService {
 
     @Transactional
     public void delete(Long id) {
+        Long userId = currentUserService.getCurrentUserId();
         Category category = getCategoryOrThrow(id);
-        if (transactionRepository.existsByCategory_Id(id)) {
+        if (transactionRepository.existsByCategory_IdAndCategory_User_Id(id, userId)) {
             throw new IllegalStateException("Kategorie kann nicht gelöscht werden, solange noch Transaktionen zugeordnet sind.");
         }
-        categoryBudgetRepository.findByCategory(category)
+        categoryBudgetRepository.findByCategoryAndCategory_User_Id(category, userId)
                 .ifPresent(categoryBudgetRepository::delete);
         categoryRepository.delete(category);
     }
 
     private Category getCategoryOrThrow(Long id) {
-        return categoryRepository.findById(id)
+        return categoryRepository.findByIdAndUser_Id(id, currentUserService.getCurrentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Kategorie mit ID " + id + " nicht gefunden"));
     }
 
     private void validateUniqueName(String name, Long currentId) {
-        categoryRepository.findByNameIgnoreCase(name.trim())
+        categoryRepository.findByUser_IdAndNameIgnoreCase(currentUserService.getCurrentUserId(), name.trim())
                 .filter(existing -> !existing.getId().equals(currentId))
                 .ifPresent(existing -> {
                     throw new IllegalStateException("Eine Kategorie mit diesem Namen existiert bereits.");

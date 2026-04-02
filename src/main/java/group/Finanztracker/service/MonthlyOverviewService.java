@@ -6,6 +6,7 @@ import group.Finanztracker.entity.Category;
 import group.Finanztracker.entity.CategoryBudget;
 import group.Finanztracker.repository.CategoryBudgetRepository;
 import group.Finanztracker.repository.CategoryRepository;
+import group.Finanztracker.service.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,23 +28,25 @@ public class MonthlyOverviewService {
     private final TransactionService transactionService;
     private final TotalBudgetService totalBudgetService;
     private final Clock clock;
+    private final CurrentUserService currentUserService;
 
     public MonthlyOverviewResponse getCurrentMonthOverview() {
         return getOverview(YearMonth.now(clock));
     }
 
     public MonthlyOverviewResponse getOverview(YearMonth month) {
+        Long userId = currentUserService.getCurrentUserId();
         BigDecimal totalBudget = totalBudgetService.getCurrentBudgetLimit();
         BigDecimal totalSpent = transactionService.sumExpensesForMonth(month);
         BigDecimal totalIncome = transactionService.sumIncomeForMonth(month);
-        BigDecimal configuredCategoryBudgetSum = getConfiguredCategoryBudgetSum();
+        BigDecimal configuredCategoryBudgetSum = getConfiguredCategoryBudgetSum(userId);
 
         Map<Long, CategoryBudget> budgetsByCategoryId = new HashMap<>();
-        for (CategoryBudget budget : categoryBudgetRepository.findAll()) {
+        for (CategoryBudget budget : categoryBudgetRepository.findAllByCategory_User_Id(userId)) {
             budgetsByCategoryId.put(budget.getCategory().getId(), budget);
         }
 
-        List<MonthlyCategorySummaryResponse> categorySummaries = categoryRepository.findAllByOrderByNameAsc().stream()
+        List<MonthlyCategorySummaryResponse> categorySummaries = categoryRepository.findAllByUser_IdOrderByNameAsc(userId).stream()
                 .map(category -> buildCategorySummary(category, budgetsByCategoryId.get(category.getId()), month))
                 .toList();
 
@@ -76,8 +79,8 @@ public class MonthlyOverviewService {
                 .build();
     }
 
-    private BigDecimal getConfiguredCategoryBudgetSum() {
-        return categoryBudgetRepository.findAll().stream()
+    private BigDecimal getConfiguredCategoryBudgetSum(Long userId) {
+        return categoryBudgetRepository.findAllByCategory_User_Id(userId).stream()
                 .map(CategoryBudget::getMonthlyLimit)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

@@ -9,6 +9,7 @@ import group.Finanztracker.exception.ResourceNotFoundException;
 import group.Finanztracker.mapper.TransactionMapper;
 import group.Finanztracker.repository.CategoryRepository;
 import group.Finanztracker.repository.TransactionRepository;
+import group.Finanztracker.service.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,44 +27,46 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final TransactionMapper transactionMapper;
+    private final CurrentUserService currentUserService;
 
     public List<TransactionResponse> findAll() {
-        return transactionRepository.findAllByOrderByDateDescIdDesc().stream()
+        return transactionRepository.findAllByCategory_User_IdOrderByDateDescIdDesc(currentUserService.getCurrentUserId()).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 
     public List<TransactionResponse> findAllByCategoryId(Long categoryId) {
-        return transactionRepository.findAllByCategory_IdOrderByDateDescIdDesc(categoryId).stream()
+        return transactionRepository.findAllByCategory_IdAndCategory_User_IdOrderByDateDescIdDesc(categoryId, currentUserService.getCurrentUserId()).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 
     public List<TransactionResponse> findAllByDateRange(LocalDate startDate, LocalDate endDate) {
-        return transactionRepository.findAllByDateBetweenOrderByDateDescIdDesc(startDate, endDate).stream()
+        return transactionRepository.findAllByDateBetweenAndCategory_User_IdOrderByDateDescIdDesc(startDate, endDate, currentUserService.getCurrentUserId()).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 
     public List<TransactionResponse> findAllByType(TransactionType type) {
-        return transactionRepository.findAllByTypeOrderByDateDescIdDesc(type).stream()
+        return transactionRepository.findAllByTypeAndCategory_User_IdOrderByDateDescIdDesc(type, currentUserService.getCurrentUserId()).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 
     public BigDecimal sumAmountOfTransactions() {
-        return transactionRepository.sumAmountofTransactions();
+        return transactionRepository.sumAmountofTransactions(currentUserService.getCurrentUserId());
     }
 
     public BigDecimal sumAmountOfTransactionsByCategory(Long categoryId) {
-        return transactionRepository.sumAmountofTransactionsByCategory(categoryId);
+        return transactionRepository.sumAmountofTransactionsByCategory(categoryId, currentUserService.getCurrentUserId());
     }
 
     public BigDecimal sumExpensesForMonth(YearMonth month) {
         return transactionRepository.sumAmountByTypeAndDateBetween(
                 TransactionType.EXPENSE,
                 month.atDay(1),
-                month.atEndOfMonth()
+                month.atEndOfMonth(),
+                currentUserService.getCurrentUserId()
         );
     }
 
@@ -71,7 +74,8 @@ public class TransactionService {
         return transactionRepository.sumAmountByTypeAndDateBetween(
                 TransactionType.INCOME,
                 month.atDay(1),
-                month.atEndOfMonth()
+                month.atEndOfMonth(),
+                currentUserService.getCurrentUserId()
         );
     }
 
@@ -79,7 +83,8 @@ public class TransactionService {
         return transactionRepository.sumMonthlyExpensesByCategory(
                 categoryId,
                 month.atDay(1),
-                month.atEndOfMonth()
+                month.atEndOfMonth(),
+                currentUserService.getCurrentUserId()
         );
     }
 
@@ -123,12 +128,12 @@ public class TransactionService {
     }
 
     private Transaction getTransactionOrThrow(Long id) {
-        return transactionRepository.findById(id)
+        return transactionRepository.findByIdAndCategory_User_Id(id, currentUserService.getCurrentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Transaktion mit ID " + id + " nicht gefunden"));
     }
 
     private Category getCategoryOrThrow(Long categoryId) {
-        return categoryRepository.findById(categoryId)
+        return categoryRepository.findByIdAndUser_Id(categoryId, currentUserService.getCurrentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Kategorie mit ID " + categoryId + " nicht gefunden"));
     }
 }

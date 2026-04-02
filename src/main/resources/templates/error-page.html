@@ -13,8 +13,9 @@
         <h1>Etwas hat nicht funktioniert</h1>
         <p class="message danger" th:text="${errorMessage}">Ein Fehler ist aufgetreten.</p>
         <div class="actions-row">
-            <a class="button-link" th:href="@{/dashboard}">Zum Dashboard</a>
-            <a class="button-link secondary" href="javascript:history.back()">Zurück</a>
+            <a class="button-link" th:href="@{/dashboard}" th:if="${userLoggedIn}">Zum Dashboard</a>
+            <a class="button-link" th:href="@{/auth/login}" th:if="${!userLoggedIn}">Zur Anmeldung</a>
+            <a class="button-link secondary" href="javascript:history.back()">Zurueck</a>
         </div>
     </section>
 </main>
