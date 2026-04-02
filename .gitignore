@@ -35,3 +35,6 @@ build/
 # Local configuration with credentials / machine-specific setup
 src/main/resources/application.properties
 compose.yaml
+
+# Maven local repository
+.m2/
