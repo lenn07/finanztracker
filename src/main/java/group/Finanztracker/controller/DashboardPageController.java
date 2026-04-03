@@ -1,6 +1,7 @@
 package group.Finanztracker.controller;
 
 import group.Finanztracker.service.MonthlyOverviewService;
+import group.Finanztracker.service.SubscriptionService;
 import group.Finanztracker.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,12 +21,15 @@ public class DashboardPageController {
 
     private final MonthlyOverviewService monthlyOverviewService;
     private final TransactionService transactionService;
+    private final SubscriptionService subscriptionService;
     private final Clock clock;
 
     @GetMapping
     public String dashboard(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
                             Model model) {
         YearMonth selectedMonth = month != null ? month : YearMonth.now(clock);
+        YearMonth syncMonth = selectedMonth.isAfter(YearMonth.now(clock)) ? YearMonth.now(clock) : selectedMonth;
+        subscriptionService.synchronizeTransactionsUpTo(syncMonth);
         model.addAttribute("overview", monthlyOverviewService.getOverview(selectedMonth));
         model.addAttribute("transactions", transactionService.findAllForMonth(selectedMonth));
         model.addAttribute("selectedMonth", selectedMonth);

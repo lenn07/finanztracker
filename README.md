@@ -4,6 +4,7 @@ Finanztracker ist eine Spring-Boot-Webanwendung zur persoenlichen Verwaltung von
 
 ## Funktionen
 - Einnahmen und Ausgaben erfassen, bearbeiten und loeschen
+- Wiederkehrende Abonnements mit monatlichem, vierteljaehrlichem oder jaehrlichem Intervall verwalten
 - Kategorien anlegen, bearbeiten und loeschen
 - Globales Monatsbudget definieren
 - Kategorie-Budgets mit festen Monatslimits verwalten
@@ -103,6 +104,7 @@ Die Standardwerte in der Compose-Datei sind:
 - `/dashboard` zeigt die Monatsuebersicht
 - `/transactions` verwaltet Einnahmen und Ausgaben
 - `/categories` verwaltet Kategorien
+- `/subscriptions` verwaltet wiederkehrende Abonnements
 - `/budgets` verwaltet Gesamtbudget und Kategorie-Budgets
 - `/auth/login` zeigt die Anmeldung
 - `/auth/register` zeigt die Registrierung
@@ -116,12 +118,15 @@ Eine Uebersicht findest du in [`ENDPOINTS.md`](/c:/IT/spring%20boot/Finanztracke
 ## Datenmodell in einfachen Worten
 - `Category`: frei benennbare Kategorie wie Lebensmittel oder Freizeit
 - `Transaction`: einzelner Einnahme- oder Ausgabe-Eintrag mit Betrag, Datum und Kategorie
+- `Subscription`: wiederkehrender Eintrag mit Intervall, Laufzeit und automatischer Transaktionserzeugung
 - `TotalBudget`: globales Monatsbudget pro Benutzer
 - `CategoryBudget`: Monatslimit fuer genau eine Kategorie
 - `AppUser`: Benutzerkonto fuer Login und Datentrennung
 - `EmailVerificationToken`: Token fuer die Freischaltung neuer Konten
 
 Die Budgets werden derzeit nicht historisiert. Wenn ein Limit geaendert wird, gilt ab dann der neue Wert.
+
+Abonnements erzeugen beim Oeffnen der App automatisch fehlende Transaktionen bis maximal zum aktuellen Monat. Bereits erzeugte Abo-Transaktionen werden ueber die Abo-Verknuepfung vor Dubletten geschuetzt.
 
 ## Tests
 ```powershell

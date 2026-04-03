@@ -10,14 +10,15 @@
 <header class="site-header">
     <div class="header-brand">
         <p class="eyebrow">Finanztracker</p>
-        <h1>Monatsübersicht</h1>
+        <h1>Monatsuebersicht</h1>
     </div>
     <div class="header-actions">
         <nav class="main-nav">
             <a th:href="@{/dashboard}" class="active">Dashboard</a>
-        <a th:href="@{/transactions}">Transaktionen</a>
-        <a th:href="@{/categories}">Kategorien</a>
-        <a th:href="@{/budgets}">Budgets</a>
+            <a th:href="@{/transactions}">Transaktionen</a>
+            <a th:href="@{/subscriptions}">Abonnements</a>
+            <a th:href="@{/categories}">Kategorien</a>
+            <a th:href="@{/budgets}">Budgets</a>
         </nav>
         <details class="account-menu" th:if="${userLoggedIn}">
             <summary class="account-trigger">
@@ -67,10 +68,10 @@
         <div class="section-head">
             <div>
                 <h2>Kategorie-Budgets</h2>
-                <p>Feste Monatslimits werden gegen die Ausgaben dieses Monats geprüft.</p>
+                <p>Feste Monatslimits werden gegen die Ausgaben dieses Monats geprueft.</p>
             </div>
             <p th:if="${overview.categoryBudgetSumExceedsTotalBudget}" class="message warning">
-                Die Summe deiner Kategorie-Budgets liegt über dem Gesamtbudget.
+                Die Summe deiner Kategorie-Budgets liegt ueber dem Gesamtbudget.
             </p>
         </div>
 
@@ -100,7 +101,7 @@
                     <td>
                         <span class="pill neutral" th:if="${!category.hasBudget}">Offen</span>
                         <span class="pill success" th:if="${category.hasBudget and !category.overLimit}">Im Rahmen</span>
-                        <span class="pill danger" th:if="${category.hasBudget and category.overLimit}">Überschritten</span>
+                        <span class="pill danger" th:if="${category.hasBudget and category.overLimit}">Ueberschritten</span>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(overview.categories)}">
@@ -115,7 +116,7 @@
         <div class="section-head">
             <div>
                 <h2>Transaktionen im Monat</h2>
-                <p>Die Liste zeigt alle Einträge mit dem ausgewählten Monatsdatum.</p>
+                <p>Die Liste zeigt alle Eintraege mit dem ausgewaehlten Monatsdatum.</p>
             </div>
             <a class="button-link" th:href="@{/transactions(month=${selectedMonth})}">Zur Verwaltung</a>
         </div>
@@ -126,6 +127,7 @@
                 <tr>
                     <th>Datum</th>
                     <th>Titel</th>
+                    <th>Quelle</th>
                     <th>Kategorie</th>
                     <th>Typ</th>
                     <th>Betrag</th>
@@ -135,12 +137,16 @@
                 <tr th:each="transaction : ${transactions}">
                     <td th:text="${transaction.date}">2026-03-30</td>
                     <td th:text="${transaction.title}">Supermarkt</td>
+                    <td>
+                        <span class="pill neutral" th:if="${transaction.generatedFromSubscription}">Abo</span>
+                        <span th:if="${!transaction.generatedFromSubscription}">Manuell</span>
+                    </td>
                     <td th:text="${transaction.categoryName}">Lebensmittel</td>
                     <td th:text="${transaction.type}">EXPENSE</td>
                     <td th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(transactions)}">
-                    <td colspan="5">Für diesen Monat gibt es noch keine Transaktionen.</td>
+                    <td colspan="6">Fuer diesen Monat gibt es noch keine Transaktionen.</td>
                 </tr>
                 </tbody>
             </table>

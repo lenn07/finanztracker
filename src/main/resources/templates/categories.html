@@ -15,9 +15,10 @@
     <div class="header-actions">
         <nav class="main-nav">
             <a th:href="@{/dashboard}">Dashboard</a>
-        <a th:href="@{/transactions}">Transaktionen</a>
-        <a th:href="@{/categories}" class="active">Kategorien</a>
-        <a th:href="@{/budgets}">Budgets</a>
+            <a th:href="@{/transactions}">Transaktionen</a>
+            <a th:href="@{/subscriptions}">Abonnements</a>
+            <a th:href="@{/categories}" class="active">Kategorien</a>
+            <a th:href="@{/budgets}">Budgets</a>
         </nav>
         <details class="account-menu" th:if="${userLoggedIn}">
             <summary class="account-trigger">
@@ -62,7 +63,7 @@
                     <td class="actions">
                         <a class="button-link secondary" th:href="@{/categories/{id}/edit(id=${category.id})}">Bearbeiten</a>
                         <form method="post" th:action="@{/categories/{id}/delete(id=${category.id})}">
-                            <button class="danger-button" type="submit">Löschen</button>
+                            <button class="danger-button" type="submit">Loeschen</button>
                         </form>
                     </td>
                 </tr>

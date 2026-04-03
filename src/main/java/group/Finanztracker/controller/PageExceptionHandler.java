@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
         TransactionPageController.class,
         CategoryPageController.class,
         BudgetPageController.class,
+        SubscriptionPageController.class,
         AuthPageController.class
 })
 public class PageExceptionHandler {

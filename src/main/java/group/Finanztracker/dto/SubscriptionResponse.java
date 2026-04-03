@@ -1,7 +1,12 @@
 package group.Finanztracker.dto;
 
+import group.Finanztracker.entity.SubscriptionInterval;
 import group.Finanztracker.entity.TransactionType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,7 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TransactionResponse {
+public class SubscriptionResponse {
 
     private Long id;
     private String title;
@@ -19,8 +24,9 @@ public class TransactionResponse {
     private TransactionType type;
     private Long categoryId;
     private String categoryName;
-    private Long subscriptionId;
-    private boolean generatedFromSubscription;
-    private LocalDate date;
+    private SubscriptionInterval interval;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String note;
+    private boolean active;
 }

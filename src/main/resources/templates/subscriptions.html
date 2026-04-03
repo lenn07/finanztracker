@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaktionen | Finanztracker</title>
+    <title>Abonnements | Finanztracker</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <header class="site-header">
     <div class="header-brand">
         <p class="eyebrow">Finanztracker</p>
-        <h1>Transaktionen</h1>
+        <h1>Abonnements</h1>
     </div>
     <div class="header-actions">
         <nav class="main-nav">
             <a th:href="@{/dashboard}">Dashboard</a>
-            <a th:href="@{/transactions}" class="active">Transaktionen</a>
-            <a th:href="@{/subscriptions}">Abonnements</a>
+            <a th:href="@{/transactions}">Transaktionen</a>
+            <a th:href="@{/subscriptions}" class="active">Abonnements</a>
             <a th:href="@{/categories}">Kategorien</a>
             <a th:href="@{/budgets}">Budgets</a>
         </nav>
@@ -37,9 +37,9 @@
 
 <main class="page two-column">
     <section class="card">
-        <h2>Neue Transaktion</h2>
+        <h2>Neues Abonnement</h2>
         <p th:if="${successMessage}" class="message success" th:text="${successMessage}"></p>
-        <form method="post" th:action="@{/transactions(month=${selectedMonth}, filterType=${selectedType}, filterCategoryId=${selectedCategoryId})}" th:object="${transactionForm}" class="stack-form">
+        <form method="post" th:action="@{/subscriptions}" th:object="${subscriptionForm}" class="stack-form">
             <label for="title">Titel</label>
             <input id="title" type="text" th:field="*{title}">
             <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
@@ -61,86 +61,73 @@
             </select>
             <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
 
-            <label for="date">Datum</label>
-            <input id="date" type="date" th:field="*{date}">
-            <p class="field-error" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></p>
+            <label for="interval">Intervall</label>
+            <select id="interval" th:field="*{interval}">
+                <option th:each="interval : ${subscriptionIntervals}" th:value="${interval}" th:text="${interval.label}"></option>
+            </select>
+            <p class="field-error" th:if="${#fields.hasErrors('interval')}" th:errors="*{interval}"></p>
+
+            <label for="startDate">Startdatum</label>
+            <input id="startDate" type="date" th:field="*{startDate}">
+            <p class="field-error" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></p>
+
+            <label for="endDate">Enddatum</label>
+            <input id="endDate" type="date" th:field="*{endDate}">
+            <p class="field-error" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></p>
+            <p class="field-error" th:if="${#fields.hasErrors('dateRangeValid')}" th:errors="*{dateRangeValid}"></p>
 
             <label for="note">Notiz</label>
             <textarea id="note" rows="4" th:field="*{note}"></textarea>
 
-            <button type="submit">Speichern</button>
+            <label class="checkbox-row" for="active">
+                <input id="active" type="checkbox" th:field="*{active}">
+                <span>Automatische Buchung aktiv</span>
+            </label>
+
+            <button type="submit">Abonnement speichern</button>
         </form>
     </section>
 
     <section class="card">
         <div class="section-head">
             <div>
-                <h2>Monatsliste</h2>
-                <p>Filtere nach Monat, Typ oder Kategorie.</p>
+                <h2>Verwaltete Abonnements</h2>
+                <p>Faellige Eintraege werden beim Oeffnen der App automatisch als Transaktionen angelegt.</p>
             </div>
         </div>
-
-        <form method="get" th:action="@{/transactions}" class="filter-grid">
-            <div>
-                <label for="month">Monat</label>
-                <input id="month" type="month" name="month" th:value="${selectedMonth}">
-            </div>
-            <div>
-                <label for="filterType">Typ</label>
-                <select id="filterType" name="filterType">
-                    <option value="">Alle</option>
-                    <option th:each="transactionType : ${transactionTypes}"
-                            th:value="${transactionType}"
-                            th:text="${transactionType}"
-                            th:selected="${selectedType == transactionType}"></option>
-                </select>
-            </div>
-            <div>
-                <label for="filterCategoryId">Kategorie</label>
-                <select id="filterCategoryId" name="filterCategoryId">
-                    <option value="">Alle</option>
-                    <option th:each="category : ${categories}"
-                            th:value="${category.id}"
-                            th:text="${category.name}"
-                            th:selected="${selectedCategoryId == category.id}"></option>
-                </select>
-            </div>
-            <button type="submit">Filtern</button>
-        </form>
 
         <div class="table-wrapper">
             <table>
                 <thead>
                 <tr>
-                    <th>Datum</th>
                     <th>Titel</th>
-                    <th>Quelle</th>
-                    <th>Kategorie</th>
-                    <th>Typ</th>
+                    <th>Intervall</th>
                     <th>Betrag</th>
+                    <th>Status</th>
                     <th>Aktionen</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="transaction : ${transactions}">
-                    <td th:text="${transaction.date}">2026-03-30</td>
-                    <td th:text="${transaction.title}">Gehalt</td>
+                <tr th:each="subscription : ${subscriptions}">
                     <td>
-                        <span class="pill neutral" th:if="${transaction.generatedFromSubscription}">Abo</span>
-                        <span th:if="${!transaction.generatedFromSubscription}">Manuell</span>
+                        <strong th:text="${subscription.title}">Streaming</strong>
+                        <p th:text="${subscription.categoryName + ' | ' + subscription.type}">Freizeit | EXPENSE</p>
                     </td>
-                    <td th:text="${transaction.categoryName}">Arbeit</td>
-                    <td th:text="${transaction.type}">INCOME</td>
-                    <td th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>
+                    <td th:text="${subscription.interval.label}">Monatlich</td>
+                    <td th:text="${#numbers.formatDecimal(subscription.amount, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>
+                    <td>
+                        <span class="pill success" th:if="${subscription.active}">Aktiv</span>
+                        <span class="pill neutral" th:if="${!subscription.active}">Pausiert</span>
+                    </td>
                     <td class="actions">
-                        <a class="button-link secondary" th:href="@{/transactions/{id}/edit(id=${transaction.id})}">Bearbeiten</a>
-                        <form method="post" th:action="@{/transactions/{id}/delete(id=${transaction.id})}">
+                        <a class="button-link secondary" th:href="@{/subscriptions/{id}/edit(id=${subscription.id})}">Bearbeiten</a>
+                        <form method="post" th:action="@{/subscriptions/{id}/delete(id=${subscription.id})}">
                             <button class="danger-button" type="submit">Loeschen</button>
                         </form>
                     </td>
                 </tr>
-                <tr th:if="${#lists.isEmpty(transactions)}">
-                    <td colspan="7">Fuer die gewaehlten Filter gibt es keine Transaktionen.</td>
+                <tr th:if="${#lists.isEmpty(subscriptions)}">
+                    <td colspan="5">Noch keine Abonnements vorhanden.</td>
                 </tr>
                 </tbody>
             </table>

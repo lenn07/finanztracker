@@ -33,6 +33,10 @@ public class Transaction {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
+
     @Column(nullable = false)
     private LocalDate date;
 

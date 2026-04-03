@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaktion bearbeiten | Finanztracker</title>
+    <title>Abonnement bearbeiten | Finanztracker</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <header class="site-header">
     <div class="header-brand">
         <p class="eyebrow">Finanztracker</p>
-        <h1>Transaktion bearbeiten</h1>
+        <h1>Abonnement bearbeiten</h1>
     </div>
     <div class="header-actions">
         <nav class="main-nav">
             <a th:href="@{/dashboard}">Dashboard</a>
-            <a th:href="@{/transactions}" class="active">Transaktionen</a>
-            <a th:href="@{/subscriptions}">Abonnements</a>
+            <a th:href="@{/transactions}">Transaktionen</a>
+            <a th:href="@{/subscriptions}" class="active">Abonnements</a>
             <a th:href="@{/categories}">Kategorien</a>
             <a th:href="@{/budgets}">Budgets</a>
         </nav>
@@ -37,7 +37,7 @@
 
 <main class="page single-column">
     <section class="card narrow">
-        <form method="post" th:action="@{/transactions/{id}(id=${transactionId})}" th:object="${transactionForm}" class="stack-form">
+        <form method="post" th:action="@{/subscriptions/{id}(id=${subscriptionId})}" th:object="${subscriptionForm}" class="stack-form">
             <label for="title">Titel</label>
             <input id="title" type="text" th:field="*{title}">
             <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
@@ -50,21 +50,40 @@
             <select id="type" th:field="*{type}">
                 <option th:each="transactionType : ${transactionTypes}" th:value="${transactionType}" th:text="${transactionType}"></option>
             </select>
+            <p class="field-error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></p>
 
             <label for="categoryId">Kategorie</label>
             <select id="categoryId" th:field="*{categoryId}">
                 <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
             </select>
+            <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
 
-            <label for="date">Datum</label>
-            <input id="date" type="date" th:field="*{date}">
+            <label for="interval">Intervall</label>
+            <select id="interval" th:field="*{interval}">
+                <option th:each="interval : ${subscriptionIntervals}" th:value="${interval}" th:text="${interval.label}"></option>
+            </select>
+            <p class="field-error" th:if="${#fields.hasErrors('interval')}" th:errors="*{interval}"></p>
+
+            <label for="startDate">Startdatum</label>
+            <input id="startDate" type="date" th:field="*{startDate}">
+            <p class="field-error" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></p>
+
+            <label for="endDate">Enddatum</label>
+            <input id="endDate" type="date" th:field="*{endDate}">
+            <p class="field-error" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></p>
+            <p class="field-error" th:if="${#fields.hasErrors('dateRangeValid')}" th:errors="*{dateRangeValid}"></p>
 
             <label for="note">Notiz</label>
             <textarea id="note" rows="4" th:field="*{note}"></textarea>
 
+            <label class="checkbox-row" for="active">
+                <input id="active" type="checkbox" th:field="*{active}">
+                <span>Automatische Buchung aktiv</span>
+            </label>
+
             <div class="actions-row">
                 <button type="submit">Aktualisieren</button>
-                <a class="button-link secondary" th:href="@{/transactions}">Zurueck</a>
+                <a class="button-link secondary" th:href="@{/subscriptions}">Zurueck</a>
             </div>
         </form>
     </section>

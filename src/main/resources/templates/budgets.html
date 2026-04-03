@@ -15,9 +15,10 @@
     <div class="header-actions">
         <nav class="main-nav">
             <a th:href="@{/dashboard}">Dashboard</a>
-        <a th:href="@{/transactions}">Transaktionen</a>
-        <a th:href="@{/categories}">Kategorien</a>
-        <a th:href="@{/budgets}" class="active">Budgets</a>
+            <a th:href="@{/transactions}">Transaktionen</a>
+            <a th:href="@{/subscriptions}">Abonnements</a>
+            <a th:href="@{/categories}">Kategorien</a>
+            <a th:href="@{/budgets}" class="active">Budgets</a>
         </nav>
         <details class="account-menu" th:if="${userLoggedIn}">
             <summary class="account-trigger">
@@ -49,17 +50,17 @@
             <p>Aktuelles Gesamtbudget: <strong th:text="${#numbers.formatDecimal(budgetSettings.totalMonthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</strong></p>
             <p>Summe aller Kategorie-Budgets: <strong th:text="${#numbers.formatDecimal(budgetSettings.configuredCategoryBudgetSum, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</strong></p>
             <p th:if="${budgetSettings.categoryBudgetSumExceedsTotalBudget}" class="message warning">
-                Die Summe der Kategorie-Budgets ist größer als dein Gesamtbudget.
+                Die Summe der Kategorie-Budgets ist groesser als dein Gesamtbudget.
             </p>
         </div>
     </section>
 
     <section class="card">
-        <h2>Kategorie-Budget hinzufügen</h2>
+        <h2>Kategorie-Budget hinzufuegen</h2>
         <form method="post" th:action="@{/budgets/category}" th:object="${categoryBudgetForm}" class="stack-form">
             <label for="categoryId">Kategorie</label>
             <select id="categoryId" th:field="*{categoryId}">
-                <option value="">Bitte wählen</option>
+                <option value="">Bitte waehlen</option>
                 <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
             </select>
             <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
@@ -90,7 +91,7 @@
                     <td class="actions">
                         <a class="button-link secondary" th:href="@{/budgets/category/{id}/edit(id=${budget.id})}">Bearbeiten</a>
                         <form method="post" th:action="@{/budgets/category/{id}/delete(id=${budget.id})}">
-                            <button class="danger-button" type="submit">Löschen</button>
+                            <button class="danger-button" type="submit">Loeschen</button>
                         </form>
                     </td>
                 </tr>

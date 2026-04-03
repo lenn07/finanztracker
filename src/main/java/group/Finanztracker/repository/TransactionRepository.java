@@ -58,5 +58,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     boolean existsByCategory_IdAndCategory_User_Id(Long categoryId, Long userId);
 
+    boolean existsBySubscription_IdAndDateBetween(Long subscriptionId, LocalDate startDate, LocalDate endDate);
+
     Optional<Transaction> findByIdAndCategory_User_Id(Long id, Long userId);
 }

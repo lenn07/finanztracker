@@ -6,6 +6,7 @@ import group.Finanztracker.dto.TransactionForm;
 import group.Finanztracker.dto.TransactionRequest;
 import group.Finanztracker.entity.TransactionType;
 import group.Finanztracker.service.CategoryService;
+import group.Finanztracker.service.SubscriptionService;
 import group.Finanztracker.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class TransactionPageController {
 
     private final TransactionService transactionService;
     private final CategoryService categoryService;
+    private final SubscriptionService subscriptionService;
     private final Clock clock;
 
     @GetMapping
@@ -119,6 +121,8 @@ public class TransactionPageController {
                                          YearMonth selectedMonth,
                                          TransactionType type,
                                          Long categoryId) {
+        YearMonth syncMonth = selectedMonth.isAfter(YearMonth.now(clock)) ? YearMonth.now(clock) : selectedMonth;
+        subscriptionService.synchronizeTransactionsUpTo(syncMonth);
         List<TransactionResponse> transactions = transactionService.findAllForMonthFiltered(selectedMonth, type, categoryId);
         List<CategoryResponse> categories = categoryService.findAll();
         model.addAttribute("transactions", transactions);
