@@ -1,0 +1,12 @@
+target
+.git
+.m2
+.gitignore
+.idea
+.vscode
+*.iml
+.DS_Store
+.env
+.env.*
+README.md
+compose.yaml

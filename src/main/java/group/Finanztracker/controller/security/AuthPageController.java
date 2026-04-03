@@ -6,6 +6,7 @@ import group.Finanztracker.service.security.EmailVerificationService;
 import group.Finanztracker.service.security.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,6 +25,8 @@ public class AuthPageController {
 
     private final RegistrationService registrationService;
     private final EmailVerificationService emailVerificationService;
+    @Value("${app.public-base-url:}")
+    private String configuredBaseUrl;
 
     @GetMapping("/login")
     public String loginPage(Model model) {
@@ -98,6 +101,11 @@ public class AuthPageController {
     }
 
     private String currentBaseUrl() {
+        if (configuredBaseUrl != null && !configuredBaseUrl.isBlank()) {
+            return configuredBaseUrl.endsWith("/")
+                    ? configuredBaseUrl.substring(0, configuredBaseUrl.length() - 1)
+                    : configuredBaseUrl;
+        }
         return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
     }
 }

@@ -29,123 +29,89 @@ Wichtig: Budgets werden aktuell nur gegen `EXPENSE`-Transaktionen gerechnet. Ein
 - Lombok
 - JUnit 5 / Mockito
 
-## Projektstruktur
-- `src/main/java/group/Finanztracker/controller`: Page- und REST-Controller
-- `src/main/java/group/Finanztracker/service`: Fachlogik
-- `src/main/java/group/Finanztracker/service/security`: Login-, Registrierungs- und Benutzerlogik
-- `src/main/java/group/Finanztracker/repository`: Datenzugriff
-- `src/main/java/group/Finanztracker/entity`: JPA-Entities
-- `src/main/java/group/Finanztracker/dto`: Form-, Request- und Response-Modelle
-- `src/main/java/group/Finanztracker/mapper`: Mapping zwischen DTOs und Entities
-- `src/main/resources/templates`: Thymeleaf-Views
-- `src/main/resources/static/css`: Styles
-- `src/main/resources/db/migration`: Flyway-Migrationen
-- `.agents/skills`: Projektlokale Codex-Skills fuer wiederkehrende Arbeitsablaeufe
-
-## Voraussetzungen
-- Java 17
-- Docker oder eine lokal laufende PostgreSQL-Datenbank
-- Optional: Ein SMTP-Konto fuer Verifikationsmails
-
 ## Lokale Konfiguration
-Die Anwendung liest ihre Werte aktuell aus `src/main/resources/application.properties`.
+Die Anwendung liest ihre Laufzeitwerte ueber Umgebungsvariablen. Fuer lokale Entwicklung importiert Spring Boot automatisch `.env` und `.env.local` aus dem Projektverzeichnis. Als Vorlage dient [`.env.example`](/c:/IT/spring%20boot/Finanztracker/.env.example).
 
-Mindestens diese Eintraege muessen zu deiner lokalen Umgebung passen:
+Wichtige Variablen:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
-spring.datasource.username=myuser
-spring.datasource.password=secret
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mydatabase
+SPRING_DATASOURCE_USERNAME=myuser
+SPRING_DATASOURCE_PASSWORD=secret
 
-app.mail.from=deine-mail@example.com
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=deine-mail@example.com
-spring.mail.password=app-password
+APP_MAIL_REQUIRED=false
+APP_MAIL_FROM=deine-mail@example.com
+APP_PUBLIC_BASE_URL=http://localhost:8080
+SPRING_MAIL_HOST=smtp.gmail.com
+SPRING_MAIL_PORT=587
+SPRING_MAIL_USERNAME=deine-mail@example.com
+SPRING_MAIL_PASSWORD=app-password
 ```
 
 Hinweise:
-- Lege keine echten Zugangsdaten in die README oder in ein oeffentliches Repository.
-- Fuer lokale Entwicklung sind Umgebungsvariablen oder eine nicht versionierte Konfigurationsdatei die bessere Wahl.
-- Wenn du keine echten Mails versenden willst, kannst du spaeter auf ein Test-SMTP-Setup wie MailHog oder Mailtrap wechseln.
+- `.env` und `.env.local` sind fuer lokale Geheimnisse gedacht und sollten nicht versioniert werden.
+- Das Format ist bewusst Java-Properties-kompatibel: `KEY=value`.
+- Wenn `APP_MAIL_REQUIRED=false` ist und keine SMTP-Daten vorhanden sind, schreibt die Anwendung den Verifikationslink nur ins Log.
 
-## Anwendung starten
-### 1. Datenbank starten
-Das Projekt enthaelt eine `compose.yaml` mit PostgreSQL:
+## Deployment-Hinweise
+Fuer Produktion sind drei Dinge wichtig:
 
-```powershell
-docker compose up -d
+1. Produktions-Defaults:
+   SQL-Logging ist standardmaessig aus und Thymeleaf-Caching standardmaessig an.
+2. Verifikationslinks:
+   Mit `APP_PUBLIC_BASE_URL` kannst du die oeffentliche URL der Anwendung fest vorgeben, zum Beispiel `https://deine-domain.tld`.
+3. Mailversand:
+   Mit `APP_MAIL_REQUIRED=true` erzwingst du, dass SMTP wirklich konfiguriert ist. Fehlen Werte, kommt eine kontrollierte Fachfehlermeldung statt eines unklaren Mail-Stacktraces.
+
+Empfohlene Variablen fuer Deployment:
+
+```properties
+PORT=8080
+SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/<datenbank>
+SPRING_DATASOURCE_USERNAME=<benutzer>
+SPRING_DATASOURCE_PASSWORD=<passwort>
+
+APP_MAIL_REQUIRED=true
+APP_MAIL_FROM=no-reply@deine-domain.tld
+APP_PUBLIC_BASE_URL=https://deine-domain.tld
+SPRING_MAIL_HOST=<smtp-host>
+SPRING_MAIL_PORT=587
+SPRING_MAIL_USERNAME=<smtp-benutzer>
+SPRING_MAIL_PASSWORD=<smtp-passwort>
 ```
 
-Die Standardwerte in der Compose-Datei sind:
-- Datenbank: `mydatabase`
-- Benutzer: `myuser`
-- Passwort: `secret`
-- Port: `5432`
+## Flyway
+Wenn deine Datenbank bereits eine alte, inzwischen geaenderte Migration gespeichert hat, ist das kein Problem der Anwendungskonfiguration, sondern der Flyway-Historie. In dem Fall solltest du die Migration nicht per Code automatisch reparieren lassen, sondern bewusst ausserhalb des normalen App-Starts vorgehen:
 
-### 2. Anwendung starten
+1. Urspruengliche Migration wiederherstellen und neue Migration anlegen, oder
+2. die Datenbank gezielt per Flyway `repair` bereinigen, wenn du sicher bist, dass die aktuelle Migration fachlich korrekt ist.
+
+Der Grund dafuer: Eine automatische Reparatur beim normalen Start waere fuer echte Deployments zu riskant.
+
+## Starten
+### Datenbank
 ```powershell
-.\mvnw.cmd spring-boot:run
+docker compose up --build
 ```
 
-### 3. App oeffnen
-- Web-UI: `http://localhost:8080`
-- Login: `http://localhost:8080/auth/login`
-- Registrierung: `http://localhost:8080/auth/register`
+Damit starten lokal sowohl PostgreSQL als auch die Spring-Boot-App im Container.
 
-## Authentifizierung
-- Nicht angemeldete Nutzer werden auf `/auth/login` geleitet.
-- Neue Benutzer registrieren sich ueber `/auth/register`.
-- Nach der Registrierung wird eine Verifikationsmail verschickt.
-- Erst nach erfolgreicher Verifikation ist ein Login moeglich.
-- Nach dem Login landet der Nutzer auf dem Dashboard.
+Fuer den lokalen Compose-Betrieb gilt:
+- Die App liest zusaetzliche Werte wie Mail-Konfiguration aus `.env`.
+- Die Datenbankverbindung wird im App-Container automatisch auf den Compose-Service `postgres` umgebogen.
+- Die PostgreSQL-Daten liegen persistent im Docker-Volume `pgdata`.
+- Die App wartet ueber `depends_on` und den Postgres-Healthcheck, bis die Datenbank antwortet.
 
-## Wichtige Seiten
-- `/dashboard` zeigt die Monatsuebersicht
-- `/transactions` verwaltet Einnahmen und Ausgaben
-- `/categories` verwaltet Kategorien
-- `/subscriptions` verwaltet wiederkehrende Abonnements
-- `/budgets` verwaltet Gesamtbudget und Kategorie-Budgets
-- `/auth/login` zeigt die Anmeldung
-- `/auth/register` zeigt die Registrierung
-- `/auth/verify?token=...` verarbeitet die E-Mail-Verifikation
+Die App ist danach unter `http://localhost:8080` erreichbar.
 
-## REST-API
-Neben der Weboberflaeche gibt es auch REST-Endpunkte fuer Kategorien, Transaktionen, Budgets und Monatsauswertungen.
-
-Eine Uebersicht findest du in [`ENDPOINTS.md`](/c:/IT/spring%20boot/Finanztracker/ENDPOINTS.md).
-
-## Datenmodell in einfachen Worten
-- `Category`: frei benennbare Kategorie wie Lebensmittel oder Freizeit
-- `Transaction`: einzelner Einnahme- oder Ausgabe-Eintrag mit Betrag, Datum und Kategorie
-- `Subscription`: wiederkehrender Eintrag mit Intervall, Laufzeit und automatischer Transaktionserzeugung
-- `TotalBudget`: globales Monatsbudget pro Benutzer
-- `CategoryBudget`: Monatslimit fuer genau eine Kategorie
-- `AppUser`: Benutzerkonto fuer Login und Datentrennung
-- `EmailVerificationToken`: Token fuer die Freischaltung neuer Konten
-
-Die Budgets werden derzeit nicht historisiert. Wenn ein Limit geaendert wird, gilt ab dann der neue Wert.
-
-Abonnements erzeugen beim Oeffnen der App automatisch fehlende Transaktionen bis maximal zum aktuellen Monat. Bereits erzeugte Abo-Transaktionen werden ueber die Abo-Verknuepfung vor Dubletten geschuetzt.
+## Erklaerung der eingebauten Aenderungen
+- [application.properties](/c:/IT/spring%20boot/Finanztracker/src/main/resources/application.properties) liest jetzt zusaetzlich `APP_MAIL_REQUIRED` und `APP_PUBLIC_BASE_URL` und setzt produktionsfreundlichere Defaults.
+- [AuthPageController.java](/c:/IT/spring%20boot/Finanztracker/src/main/java/group/Finanztracker/controller/security/AuthPageController.java) benutzt in `currentBaseUrl()` zuerst `APP_PUBLIC_BASE_URL`. Nur wenn die Variable leer ist, wird wie bisher die URL aus dem aktuellen Request aufgebaut.
+- [VerificationMailService.java](/c:/IT/spring%20boot/Finanztracker/src/main/java/group/Finanztracker/service/security/VerificationMailService.java) prueft vor dem Versand, ob Host, Benutzername und Passwort vorhanden sind. Dadurch bekommst du eine saubere Fehlermeldung oder einen Log-Fallback statt eines schwer lesbaren technischen Fehlers.
 
 ## Tests
 ```powershell
 .\mvnw.cmd test
 ```
 
-Aktuell sind vor allem Unit-Tests fuer Geschaeftsregeln enthalten, zum Beispiel:
-- Monatsuebersicht
-- Kategorie-Regeln
-- Basis-Test fuer die Anwendungsklasse
-
-## Nuetzliche Hinweise fuer Git
-- `.mvn/` gehoert normalerweise ins Repository, weil dort die Maven-Wrapper-Konfiguration liegt.
-- `.m2/` ist ein lokaler Maven-Cache und sollte nicht mitgepusht werden.
-- `target/` sollte ebenfalls nicht versioniert werden.
-
-## Codex-Skills
-- Der projektlokale Skill `implement-feature` liegt unter `.agents/skills/implement-feature`.
-- Er fuehrt Feature-Arbeit entlang dieses Ablaufs: betroffene Komponenten finden, Implementierungsplan ableiten, bei echten Unklarheiten rueckfragen, Aenderungen klein halten, README pruefen und eine kurze Summary liefern.
-- Tests werden durch diesen Skill nicht ungefragt ergaenzt oder ausgefuehrt.
-- Der projektlokale Skill `idea-finder` liegt unter `.agents/skills/idea-finder`.
-- Er hilft dabei, Verbesserungs- und Erweiterungsideen fuer das Projekt zu sammeln, zu bewerten und zu priorisieren, ohne Code oder Dateien zu aendern.
+Tests habe ich nicht erstellt und nicht ausgefuehrt.
