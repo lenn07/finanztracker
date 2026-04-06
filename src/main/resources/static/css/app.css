@@ -32,7 +32,7 @@
 /* ─── Reset ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
     margin: 0;
@@ -395,7 +395,18 @@ p { margin: 0; }
     align-items: center;
 }
 
-.inline-form { align-items: flex-end; }
+.inline-form {
+    align-items: flex-end;
+}
+
+.inline-form > * {
+    min-width: 0;
+    flex: 1 1 140px;
+}
+
+.inline-form > button {
+    flex: 0 0 auto;
+}
 
 .filter-grid {
     display: grid;
@@ -886,13 +897,20 @@ td .amount {
         align-items: stretch;
     }
 
+    .inline-form > * { flex: unset; }
+
     .actions form, .actions .button-link, .actions button,
     .actions-row .button-link, .actions-row button,
-    .inline-form button {
+    .inline-form > button, .inline-form button {
         width: 100%;
+        flex: unset;
     }
 
-    th, td { padding: 0.72rem 0.65rem; }
+    .card.narrow { width: 100%; }
+
+    .summary-panel { overflow-x: hidden; }
+
+    th, td { padding: 0.72rem 0.65rem; font-size: 0.85rem; }
 }
 
 @media (max-width: 400px) {
