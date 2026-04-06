@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kategorien | Finanztracker</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/js/app.js}" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -12,7 +13,10 @@
         <p class="eyebrow">Finanztracker</p>
         <h1>Kategorien</h1>
     </div>
-    <div class="header-actions">
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="header-actions" id="headerActions">
         <nav class="main-nav">
             <a th:href="@{/dashboard}">Dashboard</a>
             <a th:href="@{/transactions}">Transaktionen</a>
@@ -23,7 +27,7 @@
         <details class="account-menu" th:if="${userLoggedIn}">
             <summary class="account-trigger">
                 <span class="account-trigger-label">Konto</span>
-                <span class="account-trigger-icon" aria-hidden="true">v</span>
+                <span class="account-trigger-icon" aria-hidden="true">▾</span>
             </summary>
             <div class="account-panel">
                 <p class="account-email" th:text="${currentUserEmail}">user@example.com</p>

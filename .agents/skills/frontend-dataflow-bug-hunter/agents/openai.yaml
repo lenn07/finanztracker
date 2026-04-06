@@ -1,7 +1,0 @@
-interface:
-  display_name: "Frontend Dataflow Bug Hunter"
-  short_description: "Prueft UI-, Formular- und Datenfluss-Bugs."
-  default_prompt: "Nutze $frontend-dataflow-bug-hunter, um Frontend-Bugs, Formularprobleme und Datenuebergaben zwischen Thymeleaf-Views, Page-Controllern, DTOs und Backend zu pruefen. Wenn der Nutzer `Bericht` oder `nur Bericht` sagt, liefere nur eine Analyse ohne Aenderungen. Wenn der Nutzer `Direkte Aenderung` oder eine direkte Behebung verlangt, behebe sichere, lokale Fehler. Wenn kein Modus genannt ist, verhalte dich wie bisher und behebe sichere, lokale Fehler direkt."
-
-policy:
-  allow_implicit_invocation: true
