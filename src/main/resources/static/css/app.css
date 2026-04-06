@@ -455,7 +455,13 @@ textarea {
 textarea { resize: vertical; min-height: 100px; }
 
 input[type="date"],
-input[type="month"] { color-scheme: dark; }
+input[type="month"] {
+    color-scheme: dark;
+    -webkit-appearance: none;
+    appearance: none;
+    max-width: 100%;
+    box-sizing: border-box;
+}
 
 input:hover, select:hover, textarea:hover {
     border-color: rgba(255, 255, 255, 0.18);
