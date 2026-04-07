@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -28,38 +27,6 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final TransactionMapper transactionMapper;
     private final CurrentUserService currentUserService;
-
-    public List<TransactionResponse> findAll() {
-        return transactionRepository.findAllByCategory_User_IdOrderByDateDescIdDesc(currentUserService.getCurrentUserId()).stream()
-                .map(transactionMapper::toResponse)
-                .toList();
-    }
-
-    public List<TransactionResponse> findAllByCategoryId(Long categoryId) {
-        return transactionRepository.findAllByCategory_IdAndCategory_User_IdOrderByDateDescIdDesc(categoryId, currentUserService.getCurrentUserId()).stream()
-                .map(transactionMapper::toResponse)
-                .toList();
-    }
-
-    public List<TransactionResponse> findAllByDateRange(LocalDate startDate, LocalDate endDate) {
-        return transactionRepository.findAllByDateBetweenAndCategory_User_IdOrderByDateDescIdDesc(startDate, endDate, currentUserService.getCurrentUserId()).stream()
-                .map(transactionMapper::toResponse)
-                .toList();
-    }
-
-    public List<TransactionResponse> findAllByType(TransactionType type) {
-        return transactionRepository.findAllByTypeAndCategory_User_IdOrderByDateDescIdDesc(type, currentUserService.getCurrentUserId()).stream()
-                .map(transactionMapper::toResponse)
-                .toList();
-    }
-
-    public BigDecimal sumAmountOfTransactions() {
-        return transactionRepository.sumAmountofTransactions(currentUserService.getCurrentUserId());
-    }
-
-    public BigDecimal sumAmountOfTransactionsByCategory(Long categoryId) {
-        return transactionRepository.sumAmountofTransactionsByCategory(categoryId, currentUserService.getCurrentUserId());
-    }
 
     public BigDecimal sumExpensesForMonth(YearMonth month) {
         return transactionRepository.sumAmountByTypeAndDateBetween(
@@ -89,14 +56,15 @@ public class TransactionService {
     }
 
     public List<TransactionResponse> findAllForMonth(YearMonth month) {
-        return findAllByDateRange(month.atDay(1), month.atEndOfMonth());
+        return transactionRepository.findAllByDateBetweenAndCategory_User_IdOrderByDateDescIdDesc(
+                month.atDay(1), month.atEndOfMonth(), currentUserService.getCurrentUserId()
+        ).stream().map(transactionMapper::toResponse).toList();
     }
 
     public List<TransactionResponse> findAllForMonthFiltered(YearMonth month, TransactionType type, Long categoryId) {
-        return findAllForMonth(month).stream()
-                .filter(transaction -> type == null || transaction.getType() == type)
-                .filter(transaction -> categoryId == null || transaction.getCategoryId().equals(categoryId))
-                .toList();
+        return transactionRepository.findAllByDateRangeFiltered(
+                month.atDay(1), month.atEndOfMonth(), currentUserService.getCurrentUserId(), type, categoryId
+        ).stream().map(transactionMapper::toResponse).toList();
     }
 
     public TransactionResponse findById(Long id) {

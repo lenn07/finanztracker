@@ -23,8 +23,8 @@ EXPOSE 8080
 
 CMD ["sh", "-c", "java \
   -Xms64m \
-  -Xmx256m \
-  -XX:MaxMetaspaceSize=96m \
+  -Xmx192m \
+  -XX:MaxMetaspaceSize=160m \
   -XX:+UseContainerSupport \
   -XX:+ExitOnOutOfMemoryError \
   -XX:+HeapDumpOnOutOfMemoryError \

@@ -18,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CategoryBudgetService {
 
     private final CategoryBudgetRepository categoryBudgetRepository;
@@ -25,17 +26,15 @@ public class CategoryBudgetService {
     private final CategoryBudgetMapper categoryBudgetMapper;
     private final CurrentUserService currentUserService;
 
-    @Transactional(readOnly = true)
     public List<CategoryBudgetResponse> getAll() {
         return categoryBudgetRepository.findAllByCategory_User_IdOrderByCategory_NameAsc(currentUserService.getCurrentUserId()).stream()
                 .map(categoryBudgetMapper::toResponse)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public CategoryBudgetResponse getById(Long id) {
         CategoryBudget entity = categoryBudgetRepository.findByIdAndCategory_User_Id(id, currentUserService.getCurrentUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("CategoryBudget not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Kategoriebudget mit ID " + id + " nicht gefunden"));
         return categoryBudgetMapper.toResponse(entity);
     }
 
@@ -43,7 +42,7 @@ public class CategoryBudgetService {
     public CategoryBudgetResponse create(CategoryBudgetRequest request) {
         Long userId = currentUserService.getCurrentUserId();
         Category category = categoryRepository.findByIdAndUser_Id(request.getCategoryId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Kategorie mit ID " + request.getCategoryId() + " nicht gefunden"));
         if (categoryBudgetRepository.findByCategoryAndCategory_User_Id(category, userId).isPresent()) {
             throw new IllegalStateException("Für diese Kategorie existiert bereits ein Budget.");
         }
@@ -56,9 +55,9 @@ public class CategoryBudgetService {
     public CategoryBudgetResponse update(Long id, CategoryBudgetRequest request) {
         Long userId = currentUserService.getCurrentUserId();
         CategoryBudget entity = categoryBudgetRepository.findByIdAndCategory_User_Id(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("CategoryBudget not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Kategoriebudget mit ID " + id + " nicht gefunden"));
         Category category = categoryRepository.findByIdAndUser_Id(request.getCategoryId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Kategorie mit ID " + request.getCategoryId() + " nicht gefunden"));
         categoryBudgetRepository.findByCategoryAndCategory_User_Id(category, userId)
                 .filter(existing -> !existing.getId().equals(id))
                 .ifPresent(existing -> {
@@ -71,13 +70,11 @@ public class CategoryBudgetService {
 
     @Transactional
     public void delete(Long id) {
-        if (categoryBudgetRepository.findByIdAndCategory_User_Id(id, currentUserService.getCurrentUserId()).isEmpty()) {
-            throw new ResourceNotFoundException("CategoryBudget not found with id: " + id);
-        }
-        categoryBudgetRepository.deleteById(id);
+        CategoryBudget entity = categoryBudgetRepository.findByIdAndCategory_User_Id(id, currentUserService.getCurrentUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Kategoriebudget mit ID " + id + " nicht gefunden"));
+        categoryBudgetRepository.delete(entity);
     }
 
-    @Transactional(readOnly = true)
     public BigDecimal getConfiguredCategoryBudgetSum() {
         return categoryBudgetRepository.findAllByCategory_User_Id(currentUserService.getCurrentUserId()).stream()
                 .map(CategoryBudget::getMonthlyLimit)

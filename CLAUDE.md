@@ -54,7 +54,7 @@ Tests nur nach Rücksprache schreiben. Kein Test-Code ohne explizite Aufforderun
 
 ## Git
 
-Git wird ausschließlich vom Nutzer selbst verwaltet. Claude führt keine Git-Befehle aus (kein `commit`, `push`, `branch`, `merge` o. ä.). Bei Bedarf kann Claude einen sinnvollen Commit-Message-Vorschlag machen, aber nicht selbst committen.
+**Git wird NIEMALS von Claude ausgeführt.** Keinerlei Git-Befehle — auch nicht `git log`, `git diff`, `git status`, `git rev-parse` oder ähnliches. Git wird ausschließlich vom Nutzer selbst verwaltet. Bei Bedarf kann Claude einen sinnvollen Commit-Message-Vorschlag machen, aber nicht selbst committen. Für Code-Reviews wird der aktuelle Dateizustand direkt gelesen — niemals git.
 
 ## Weitere Hinweise für Claude
 

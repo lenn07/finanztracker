@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
@@ -27,12 +26,7 @@ public class MonthlyOverviewService {
     private final CategoryBudgetRepository categoryBudgetRepository;
     private final TransactionService transactionService;
     private final TotalBudgetService totalBudgetService;
-    private final Clock clock;
     private final CurrentUserService currentUserService;
-
-    public MonthlyOverviewResponse getCurrentMonthOverview() {
-        return getOverview(YearMonth.now(clock));
-    }
 
     public MonthlyOverviewResponse getOverview(YearMonth month) {
         Long userId = currentUserService.getCurrentUserId();
