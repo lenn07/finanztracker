@@ -21,4 +21,13 @@ COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar /app/app.jar"]
+CMD ["sh", "-c", "java \
+  -Xms64m \
+  -Xmx256m \
+  -XX:MaxMetaspaceSize=96m \
+  -XX:+UseContainerSupport \
+  -XX:+ExitOnOutOfMemoryError \
+  -XX:+HeapDumpOnOutOfMemoryError \
+  -Djava.security.egd=file:/dev/./urandom \
+  -Dserver.port=${PORT:-8080} \
+  -jar /app/app.jar"]
