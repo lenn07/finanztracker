@@ -46,12 +46,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findAllByDateBetweenAndCategory_User_IdOrderByDateDescIdDesc(LocalDate startDate, LocalDate endDate, Long userId);
 
-    List<Transaction> findAllByCategory_User_IdOrderByDateDescIdDesc(Long userId);
-
-    List<Transaction> findAllByCategory_IdAndCategory_User_IdOrderByDateDescIdDesc(Long categoryId, Long userId);
-
-    List<Transaction> findAllByTypeAndCategory_User_IdOrderByDateDescIdDesc(TransactionType type, Long userId);
-
     boolean existsByCategory_IdAndCategory_User_Id(Long categoryId, Long userId);
 
     boolean existsBySubscription_IdAndDateBetween(Long subscriptionId, LocalDate startDate, LocalDate endDate);

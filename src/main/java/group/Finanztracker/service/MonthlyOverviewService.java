@@ -33,12 +33,17 @@ public class MonthlyOverviewService {
         BigDecimal totalBudget = totalBudgetService.getCurrentBudgetLimit();
         BigDecimal totalSpent = transactionService.sumExpensesForMonth(month);
         BigDecimal totalIncome = transactionService.sumIncomeForMonth(month);
-        BigDecimal configuredCategoryBudgetSum = getConfiguredCategoryBudgetSum(userId);
+
+        List<CategoryBudget> allBudgets = categoryBudgetRepository.findAllByCategory_User_Id(userId);
 
         Map<Long, CategoryBudget> budgetsByCategoryId = new HashMap<>();
-        for (CategoryBudget budget : categoryBudgetRepository.findAllByCategory_User_Id(userId)) {
+        for (CategoryBudget budget : allBudgets) {
             budgetsByCategoryId.put(budget.getCategory().getId(), budget);
         }
+
+        BigDecimal configuredCategoryBudgetSum = allBudgets.stream()
+                .map(CategoryBudget::getMonthlyLimit)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<MonthlyCategorySummaryResponse> categorySummaries = categoryRepository.findAllByUser_IdOrderByNameAsc(userId).stream()
                 .map(category -> buildCategorySummary(category, budgetsByCategoryId.get(category.getId()), month))
@@ -71,11 +76,5 @@ public class MonthlyOverviewService {
                 .overLimit(limit != null && spent.compareTo(limit) > 0)
                 .hasBudget(limit != null)
                 .build();
-    }
-
-    private BigDecimal getConfiguredCategoryBudgetSum(Long userId) {
-        return categoryBudgetRepository.findAllByCategory_User_Id(userId).stream()
-                .map(CategoryBudget::getMonthlyLimit)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
