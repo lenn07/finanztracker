@@ -58,6 +58,7 @@ Tests nur nach Rücksprache schreiben. Kein Test-Code ohne explizite Aufforderun
 
 ## Weitere Hinweise für Claude
 
+- **Bei Unklarheiten immer zuerst nachfragen — niemals Annahmen treffen und einfach loslegen.** Lieber eine kurze Rückfrage stellen, als in die falsche Richtung zu implementieren.
 - Diese Datei wird kontinuierlich verbessert. Wenn im Gespräch etwas Sinnvolles ergänzt werden könnte (z. B. eine neue Konvention fällt auf), kurz nachfragen ob es aufgenommen werden soll.
 - Vor Änderungen an bestehenden Dateien immer erst lesen.
 - Keine spekulativen Abstraktionen oder Features, die nicht explizit angefragt wurden.

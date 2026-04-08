@@ -51,4 +51,26 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     boolean existsBySubscription_IdAndDateBetween(Long subscriptionId, LocalDate startDate, LocalDate endDate);
 
     Optional<Transaction> findByIdAndCategory_User_Id(Long id, Long userId);
+
+    @Query("""
+            SELECT YEAR(t.date), MONTH(t.date), COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.type = :type
+              AND t.category.user.id = :userId
+              AND t.date BETWEEN :startDate AND :endDate
+            GROUP BY YEAR(t.date), MONTH(t.date)
+            ORDER BY YEAR(t.date), MONTH(t.date)
+            """)
+    List<Object[]> sumAmountGroupedByMonth(TransactionType type, LocalDate startDate, LocalDate endDate, Long userId);
+
+    @Query("""
+            SELECT t.category.name, COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.type = 'EXPENSE'
+              AND t.category.user.id = :userId
+              AND t.date BETWEEN :startDate AND :endDate
+            GROUP BY t.category.name
+            ORDER BY SUM(t.amount) DESC
+            """)
+    List<Object[]> sumExpensesGroupedByCategory(LocalDate startDate, LocalDate endDate, Long userId);
 }
