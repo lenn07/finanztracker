@@ -14,6 +14,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,6 +65,28 @@ public class AnalyseService {
             }
         }
 
+        Map<String, Map<YearMonth, BigDecimal>> categoryMonthMap = new LinkedHashMap<>();
+        for (Object[] row : transactionRepository.sumExpensesGroupedByCategoryAndMonth(startDate, endDate, userId)) {
+            String catName = (String) row[0];
+            int year = ((Number) row[1]).intValue();
+            int month = ((Number) row[2]).intValue();
+            categoryMonthMap
+                    .computeIfAbsent(catName, k -> new HashMap<>())
+                    .put(YearMonth.of(year, month), (BigDecimal) row[3]);
+        }
+
+        List<String> categoryTrendNames = new ArrayList<>();
+        List<List<BigDecimal>> categoryTrendData = new ArrayList<>();
+
+        for (Map.Entry<String, Map<YearMonth, BigDecimal>> entry : categoryMonthMap.entrySet()) {
+            categoryTrendNames.add(entry.getKey());
+            List<BigDecimal> series = new ArrayList<>();
+            for (YearMonth ym = start; !ym.isAfter(now); ym = ym.plusMonths(1)) {
+                series.add(entry.getValue().getOrDefault(ym, BigDecimal.ZERO));
+            }
+            categoryTrendData.add(series);
+        }
+
         return AnalyseViewModel.builder()
                 .trendLabels(trendLabels)
                 .trendExpenses(trendExpenses)
@@ -71,6 +94,8 @@ public class AnalyseService {
                 .categoryLabels(categoryLabels)
                 .categoryData(categoryData)
                 .selectedMonths(months)
+                .categoryTrendNames(categoryTrendNames)
+                .categoryTrendData(categoryTrendData)
                 .build();
     }
 

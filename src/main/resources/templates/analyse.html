@@ -65,6 +65,17 @@
     <section class="card">
         <div class="section-head">
             <div>
+                <h2>Ausgaben nach Kategorie (Verlauf)</h2>
+                <p>Monatliche Ausgaben je Kategorie der letzten <span th:text="${vm.selectedMonths}">6</span> Monate.</p>
+            </div>
+        </div>
+        <canvas id="categoryTrendChart"></canvas>
+        <p th:if="${#lists.isEmpty(vm.categoryTrendNames)}" class="message">Keine Ausgaben im gewählten Zeitraum.</p>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <div>
                 <h2>Ausgaben nach Kategorie</h2>
                 <p>Anteile der Ausgaben über den gewählten Zeitraum.</p>
             </div>
@@ -76,15 +87,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script th:inline="javascript">
-    const trendLabels    = /*[[${vm.trendLabels}]]*/ [];
-    const trendExpenses  = /*[[${vm.trendExpenses}]]*/ [];
-    const trendIncome    = /*[[${vm.trendIncome}]]*/ [];
-    const categoryLabels = /*[[${vm.categoryLabels}]]*/ [];
-    const categoryData   = /*[[${vm.categoryData}]]*/ [];
+    const trendLabels        = /*[[${vm.trendLabels}]]*/ [];
+    const trendExpenses      = /*[[${vm.trendExpenses}]]*/ [];
+    const trendIncome        = /*[[${vm.trendIncome}]]*/ [];
+    const categoryLabels     = /*[[${vm.categoryLabels}]]*/ [];
+    const categoryData       = /*[[${vm.categoryData}]]*/ [];
+    const categoryTrendNames = /*[[${vm.categoryTrendNames}]]*/ [];
+    const categoryTrendData  = /*[[${vm.categoryTrendData}]]*/ [];
 </script>
 <script>
     Chart.defaults.color = '#6b7a90';
     Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    const CHART_COLORS = [
+        '#00d07e','#ff5c5c','#f5a623','#5b8dee','#c97bff',
+        '#00bcd4','#ff7043','#66bb6a','#ab47bc','#26c6da'
+    ];
 
     new Chart(document.getElementById('trendChart'), {
         type: 'line',
@@ -129,6 +147,40 @@
         }
     });
 
+    if (categoryTrendNames.length > 0) {
+        new Chart(document.getElementById('categoryTrendChart'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: categoryTrendNames.map((name, i) => ({
+                    label: name,
+                    data: categoryTrendData[i],
+                    borderColor: CHART_COLORS[i % CHART_COLORS.length],
+                    backgroundColor: 'transparent',
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 4
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#e8ecf2' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#6b7a90' } },
+                    y: {
+                        ticks: {
+                            color: '#6b7a90',
+                            callback: v => v.toLocaleString('de-DE') + ' EUR'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
     if (categoryLabels.length > 0) {
         new Chart(document.getElementById('categoryChart'), {
             type: 'pie',
@@ -136,10 +188,7 @@
                 labels: categoryLabels,
                 datasets: [{
                     data: categoryData,
-                    backgroundColor: [
-                        '#00d07e','#ff5c5c','#f5a623','#5b8dee','#c97bff',
-                        '#00bcd4','#ff7043','#66bb6a','#ab47bc','#26c6da'
-                    ]
+                    backgroundColor: CHART_COLORS
                 }]
             },
             options: {

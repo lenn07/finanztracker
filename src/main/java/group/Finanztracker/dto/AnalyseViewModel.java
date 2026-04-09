@@ -21,4 +21,6 @@ public class AnalyseViewModel {
     private List<String> categoryLabels;
     private List<BigDecimal> categoryData;
     private int selectedMonths;
+    private List<String> categoryTrendNames;
+    private List<List<BigDecimal>> categoryTrendData;
 }

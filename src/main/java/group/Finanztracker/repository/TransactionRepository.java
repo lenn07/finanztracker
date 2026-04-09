@@ -73,4 +73,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             ORDER BY SUM(t.amount) DESC
             """)
     List<Object[]> sumExpensesGroupedByCategory(LocalDate startDate, LocalDate endDate, Long userId);
+
+    @Query("""
+            SELECT t.category.name, YEAR(t.date), MONTH(t.date), COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.type = 'EXPENSE'
+              AND t.category.user.id = :userId
+              AND t.date BETWEEN :startDate AND :endDate
+            GROUP BY t.category.name, YEAR(t.date), MONTH(t.date)
+            ORDER BY t.category.name, YEAR(t.date), MONTH(t.date)
+            """)
+    List<Object[]> sumExpensesGroupedByCategoryAndMonth(LocalDate startDate, LocalDate endDate, Long userId);
 }
