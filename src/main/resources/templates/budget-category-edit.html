@@ -24,19 +24,8 @@
             <a th:href="@{/categories}">Kategorien</a>
             <a th:href="@{/budgets}" class="active">Budgets</a>
             <a th:href="@{/analyse}">Analyse</a>
+            <a th:href="@{/settings}">Einstellungen</a>
         </nav>
-        <details class="account-menu" th:if="${userLoggedIn}">
-            <summary class="account-trigger">
-                <span class="account-trigger-label">Konto</span>
-                <span class="account-trigger-icon" aria-hidden="true">▾</span>
-            </summary>
-            <div class="account-panel">
-                <p class="account-email" th:text="${currentUserEmail}">user@example.com</p>
-                <form method="post" th:action="@{/auth/logout}">
-                    <button class="button-link secondary logout-button" type="submit">Abmelden</button>
-                </form>
-            </div>
-        </details>
     </div>
 </header>
 

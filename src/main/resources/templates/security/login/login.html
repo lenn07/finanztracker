@@ -18,6 +18,7 @@
         <p th:if="${param.logout}" class="message success">Du wurdest erfolgreich abgemeldet.</p>
         <p th:if="${param.error}" class="message danger">Die Anmeldung war nicht erfolgreich. Bitte pruefe deine Daten.</p>
         <p th:if="${param.unverified}" class="message warning">Bitte bestaetige zuerst deine E-Mail-Adresse.</p>
+        <p th:if="${param.accountDeleted}" class="message success">Dein Konto wurde erfolgreich gelöscht.</p>
         <p th:if="${successMessage}" class="message success" th:text="${successMessage}"></p>
         <p th:if="${dangerMessage}" class="message danger" th:text="${dangerMessage}"></p>
 

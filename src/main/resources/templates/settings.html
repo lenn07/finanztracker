@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einstellungen | Finanztracker</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/js/app.js}" defer></script>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-brand">
+        <p class="eyebrow">Finanztracker</p>
+        <h1>Einstellungen</h1>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="header-actions" id="headerActions">
+        <nav class="main-nav">
+            <a th:href="@{/dashboard}">Dashboard</a>
+            <a th:href="@{/transactions}">Transaktionen</a>
+            <a th:href="@{/subscriptions}">Abonnements</a>
+            <a th:href="@{/categories}">Kategorien</a>
+            <a th:href="@{/budgets}">Budgets</a>
+            <a th:href="@{/analyse}">Analyse</a>
+            <a th:href="@{/settings}" class="active">Einstellungen</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page single-column">
+    <section class="card narrow">
+        <h2>Konto</h2>
+
+        <p class="account-email" th:text="${currentUserEmail}">user@example.com</p>
+
+        <form method="post" th:action="@{/auth/logout}" class="stack-form">
+            <button type="submit" class="button-link secondary logout-button">Abmelden</button>
+        </form>
+
+        <div class="stack-form">
+            <button type="button" class="danger-button"
+                    onclick="document.getElementById('deleteModal').removeAttribute('hidden')">
+                Konto löschen
+            </button>
+        </div>
+    </section>
+</main>
+
+<div id="deleteModal" class="modal-overlay" hidden>
+    <div class="modal-card">
+        <h2>Konto wirklich löschen?</h2>
+        <p>Diese Aktion ist unwiderruflich. Alle deine Daten — Transaktionen, Kategorien, Budgets und Abonnements — werden dauerhaft gelöscht.</p>
+        <div class="modal-actions">
+            <button type="button" class="button-link secondary"
+                    onclick="document.getElementById('deleteModal').setAttribute('hidden', '')">
+                Abbrechen
+            </button>
+            <form method="post" th:action="@{/settings/delete}">
+                <button type="submit" class="danger-button">Endgültig löschen</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
