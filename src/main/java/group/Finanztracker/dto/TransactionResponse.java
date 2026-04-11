@@ -19,7 +19,6 @@ public class TransactionResponse {
     private TransactionType type;
     private Long categoryId;
     private String categoryName;
-    private Long subscriptionId;
     private boolean generatedFromSubscription;
     private LocalDate date;
     private String note;

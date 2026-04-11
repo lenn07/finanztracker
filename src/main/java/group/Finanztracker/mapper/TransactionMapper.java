@@ -28,7 +28,6 @@ public class TransactionMapper {
                 .type(transaction.getType())
                 .categoryId(transaction.getCategory().getId())
                 .categoryName(transaction.getCategory().getName())
-                .subscriptionId(transaction.getSubscription() != null ? transaction.getSubscription().getId() : null)
                 .generatedFromSubscription(transaction.getSubscription() != null)
                 .date(transaction.getDate())
                 .note(transaction.getNote())
