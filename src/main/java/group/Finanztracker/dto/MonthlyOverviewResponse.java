@@ -26,4 +26,8 @@ public class MonthlyOverviewResponse {
     private BigDecimal configuredCategoryBudgetSum;
     private boolean categoryBudgetSumExceedsTotalBudget;
     private List<MonthlyCategorySummaryResponse> categories;
+
+    // Rollover-Felder — gleich totalBudget wenn Feature deaktiviert
+    private BigDecimal effectiveBudget;
+    private boolean rolloverEnabled;
 }

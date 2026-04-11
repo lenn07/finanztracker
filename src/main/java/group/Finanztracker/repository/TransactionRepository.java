@@ -1,5 +1,8 @@
 package group.Finanztracker.repository;
 
+import group.Finanztracker.dto.CategoryAmountPoint;
+import group.Finanztracker.dto.CategoryMonthAmountPoint;
+import group.Finanztracker.dto.MonthlyAmountPoint;
 import group.Finanztracker.entity.Transaction;
 import group.Finanztracker.entity.TransactionType;
 
@@ -53,7 +56,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Optional<Transaction> findByIdAndCategory_User_Id(Long id, Long userId);
 
     @Query("""
-            SELECT YEAR(t.date), MONTH(t.date), COALESCE(SUM(t.amount), 0)
+            SELECT new group.Finanztracker.dto.MonthlyAmountPoint(YEAR(t.date), MONTH(t.date), COALESCE(SUM(t.amount), 0))
             FROM Transaction t
             WHERE t.type = :type
               AND t.category.user.id = :userId
@@ -61,10 +64,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             GROUP BY YEAR(t.date), MONTH(t.date)
             ORDER BY YEAR(t.date), MONTH(t.date)
             """)
-    List<Object[]> sumAmountGroupedByMonth(TransactionType type, LocalDate startDate, LocalDate endDate, Long userId);
+    List<MonthlyAmountPoint> sumAmountGroupedByMonth(TransactionType type, LocalDate startDate, LocalDate endDate, Long userId);
 
     @Query("""
-            SELECT t.category.name, COALESCE(SUM(t.amount), 0)
+            SELECT new group.Finanztracker.dto.CategoryAmountPoint(t.category.name, COALESCE(SUM(t.amount), 0))
             FROM Transaction t
             WHERE t.type = 'EXPENSE'
               AND t.category.user.id = :userId
@@ -72,10 +75,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             GROUP BY t.category.name
             ORDER BY SUM(t.amount) DESC
             """)
-    List<Object[]> sumExpensesGroupedByCategory(LocalDate startDate, LocalDate endDate, Long userId);
+    List<CategoryAmountPoint> sumExpensesGroupedByCategory(LocalDate startDate, LocalDate endDate, Long userId);
 
     @Query("""
-            SELECT t.category.name, YEAR(t.date), MONTH(t.date), COALESCE(SUM(t.amount), 0)
+            SELECT new group.Finanztracker.dto.CategoryMonthAmountPoint(t.category.name, YEAR(t.date), MONTH(t.date), COALESCE(SUM(t.amount), 0))
             FROM Transaction t
             WHERE t.type = 'EXPENSE'
               AND t.category.user.id = :userId
@@ -83,5 +86,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             GROUP BY t.category.name, YEAR(t.date), MONTH(t.date)
             ORDER BY t.category.name, YEAR(t.date), MONTH(t.date)
             """)
-    List<Object[]> sumExpensesGroupedByCategoryAndMonth(LocalDate startDate, LocalDate endDate, Long userId);
+    List<CategoryMonthAmountPoint> sumExpensesGroupedByCategoryAndMonth(LocalDate startDate, LocalDate endDate, Long userId);
 }

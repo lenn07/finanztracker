@@ -40,9 +40,13 @@
     </section>
 
     <section class="metrics">
-        <article class="metric-card">
+        <article class="metric-card" th:if="${!overview.rolloverEnabled}">
             <span>Gesamtbudget</span>
             <strong th:text="${#numbers.formatDecimal(overview.totalBudget, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
+        </article>
+        <article class="metric-card" th:if="${overview.rolloverEnabled}">
+            <span>Effektives Budget</span>
+            <strong th:text="${#numbers.formatDecimal(overview.effectiveBudget, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
         </article>
         <article class="metric-card">
             <span>Ausgaben</span>
@@ -50,7 +54,8 @@
         </article>
         <article class="metric-card" th:classappend="${overview.overBudget} ? ' danger' : ' success'">
             <span>Restbudget</span>
-            <strong th:text="${#numbers.formatDecimal(overview.remainingBudget, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
+            <strong th:if="${!overview.rolloverEnabled}" th:text="${#numbers.formatDecimal(overview.remainingBudget, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
+            <strong th:if="${overview.rolloverEnabled}" th:text="${#numbers.formatDecimal(overview.effectiveBudget.subtract(overview.totalSpent), 1, 'POINT', 2, 'COMMA')} + ' EUR'">0,00 EUR</strong>
         </article>
         <article class="metric-card">
             <span>Einnahmen</span>

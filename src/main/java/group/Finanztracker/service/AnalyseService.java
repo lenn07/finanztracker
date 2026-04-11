@@ -1,6 +1,7 @@
 package group.Finanztracker.service;
 
 import group.Finanztracker.dto.AnalyseViewModel;
+import group.Finanztracker.dto.MonthlyAmountPoint;
 import group.Finanztracker.entity.TransactionType;
 import group.Finanztracker.repository.TransactionRepository;
 import group.Finanztracker.service.security.CurrentUserService;
@@ -51,28 +52,21 @@ public class AnalyseService {
             trendIncome.add(incomeMap.getOrDefault(ym, BigDecimal.ZERO));
         }
 
-        List<Object[]> categoryRows =
-                transactionRepository.sumExpensesGroupedByCategory(startDate, endDate, userId);
-
         List<String> categoryLabels = new ArrayList<>();
         List<BigDecimal> categoryData = new ArrayList<>();
 
-        for (Object[] row : categoryRows) {
-            BigDecimal amount = (BigDecimal) row[1];
-            if (amount.compareTo(BigDecimal.ZERO) > 0) {
-                categoryLabels.add((String) row[0]);
-                categoryData.add(amount);
+        for (var point : transactionRepository.sumExpensesGroupedByCategory(startDate, endDate, userId)) {
+            if (point.amount().compareTo(BigDecimal.ZERO) > 0) {
+                categoryLabels.add(point.categoryName());
+                categoryData.add(point.amount());
             }
         }
 
         Map<String, Map<YearMonth, BigDecimal>> categoryMonthMap = new LinkedHashMap<>();
-        for (Object[] row : transactionRepository.sumExpensesGroupedByCategoryAndMonth(startDate, endDate, userId)) {
-            String catName = (String) row[0];
-            int year = ((Number) row[1]).intValue();
-            int month = ((Number) row[2]).intValue();
+        for (var point : transactionRepository.sumExpensesGroupedByCategoryAndMonth(startDate, endDate, userId)) {
             categoryMonthMap
-                    .computeIfAbsent(catName, k -> new HashMap<>())
-                    .put(YearMonth.of(year, month), (BigDecimal) row[3]);
+                    .computeIfAbsent(point.categoryName(), k -> new HashMap<>())
+                    .put(YearMonth.of(point.year(), point.month()), point.amount());
         }
 
         List<String> categoryTrendNames = new ArrayList<>();
@@ -99,12 +93,10 @@ public class AnalyseService {
                 .build();
     }
 
-    private Map<YearMonth, BigDecimal> toYearMonthMap(List<Object[]> rows) {
+    private Map<YearMonth, BigDecimal> toYearMonthMap(List<MonthlyAmountPoint> points) {
         Map<YearMonth, BigDecimal> map = new HashMap<>();
-        for (Object[] row : rows) {
-            int year = ((Number) row[0]).intValue();
-            int month = ((Number) row[1]).intValue();
-            map.put(YearMonth.of(year, month), (BigDecimal) row[2]);
+        for (var point : points) {
+            map.put(YearMonth.of(point.year(), point.month()), point.amount());
         }
         return map;
     }

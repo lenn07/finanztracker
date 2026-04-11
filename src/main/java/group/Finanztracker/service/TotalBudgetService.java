@@ -1,5 +1,6 @@
 package group.Finanztracker.service;
 
+import group.Finanztracker.dto.RolloverSettingsForm;
 import group.Finanztracker.dto.TotalBudgetRequest;
 import group.Finanztracker.dto.TotalBudgetResponse;
 import group.Finanztracker.entity.TotalBudget;
@@ -12,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -30,10 +33,17 @@ public class TotalBudgetService {
                 .map(totalBudgetMapper::toResponse);
     }
 
-    public BigDecimal getCurrentBudgetLimit() {
+    public Optional<RolloverSettingsForm> getRolloverSettings() {
         return totalBudgetRepository.findFirstByUser_IdOrderByIdAsc(currentUserService.getCurrentUserId())
-                .map(TotalBudget::getTotalMonthlyLimit)
-                .orElse(BigDecimal.ZERO);
+                .map(b -> {
+                    String startMonth = b.getRolloverStartMonth() != null
+                            ? YearMonth.from(b.getRolloverStartMonth()).format(DateTimeFormatter.ofPattern("yyyy-MM"))
+                            : "";
+                    return RolloverSettingsForm.builder()
+                            .rolloverEnabled(b.isRolloverEnabled())
+                            .rolloverStartMonth(startMonth)
+                            .build();
+                });
     }
 
     @Transactional
@@ -41,6 +51,20 @@ public class TotalBudgetService {
         return totalBudgetRepository.findFirstByUser_IdOrderByIdAsc(currentUserService.getCurrentUserId())
                 .map(existing -> update(existing.getId(), request))
                 .orElseGet(() -> create(request));
+    }
+
+    @Transactional
+    public void saveRolloverSettings(RolloverSettingsForm form) {
+        TotalBudget budget = totalBudgetRepository.findFirstByUser_IdOrderByIdAsc(currentUserService.getCurrentUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Kein Gesamtbudget konfiguriert"));
+        budget.setRolloverEnabled(form.isRolloverEnabled());
+        if (form.isRolloverEnabled()
+                && form.getRolloverStartMonth() != null
+                && !form.getRolloverStartMonth().isBlank()) {
+            LocalDate startDate = YearMonth.parse(form.getRolloverStartMonth()).atDay(1);
+            budget.setRolloverStartMonth(startDate);
+        }
+        totalBudgetRepository.save(budget);
     }
 
     private TotalBudgetResponse create(TotalBudgetRequest request) {

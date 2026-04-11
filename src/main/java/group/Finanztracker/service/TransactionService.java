@@ -15,8 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +56,15 @@ public class TransactionService {
                 month.atEndOfMonth(),
                 currentUserService.getCurrentUserId()
         );
+    }
+
+    public Map<YearMonth, BigDecimal> sumExpensesGroupedByMonth(LocalDate startDate, LocalDate endDate) {
+        Map<YearMonth, BigDecimal> result = new HashMap<>();
+        for (var point : transactionRepository.sumAmountGroupedByMonth(
+                TransactionType.EXPENSE, startDate, endDate, currentUserService.getCurrentUserId())) {
+            result.put(YearMonth.of(point.year(), point.month()), point.amount());
+        }
+        return result;
     }
 
     public List<TransactionResponse> findAllForMonth(YearMonth month) {

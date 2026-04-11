@@ -12,6 +12,7 @@ public class TotalBudgetMapper {
     public TotalBudget toEntity(TotalBudgetRequest request, AppUser user) {
         return TotalBudget.builder()
                 .totalMonthlyLimit(request.getTotalMonthlyLimit())
+                .rolloverEnabled(false)
                 .user(user)
                 .build();
     }
@@ -20,6 +21,8 @@ public class TotalBudgetMapper {
         return TotalBudgetResponse.builder()
                 .id(entity.getId())
                 .totalMonthlyLimit(entity.getTotalMonthlyLimit())
+                .rolloverEnabled(entity.isRolloverEnabled())
+                .rolloverStartMonth(entity.getRolloverStartMonth())
                 .build();
     }
 

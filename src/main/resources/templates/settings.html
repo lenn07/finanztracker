@@ -46,6 +46,34 @@
             </button>
         </div>
     </section>
+
+    <section class="card narrow" th:if="${budgetExists}">
+        <h2>Budget-Übertrag</h2>
+        <p class="message success" th:if="${param.rolloverSaved}">Einstellungen gespeichert.</p>
+
+        <form method="post" th:action="@{/settings/rollover}" th:object="${rolloverSettings}" class="stack-form">
+            <label for="rolloverEnabled" style="display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer; width:fit-content; white-space:nowrap; align-self:center;">
+                Übertrag aktivieren
+                <input type="checkbox" id="rolloverEnabled" name="rolloverEnabled"
+                       th:checked="${rolloverSettings.rolloverEnabled}"
+                       onchange="document.getElementById('rolloverStartMonthGroup').hidden = !this.checked">
+            </label>
+
+            <div id="rolloverStartMonthGroup"
+                 th:attr="hidden=${!rolloverSettings.rolloverEnabled} ? 'hidden' : null">
+                <label for="rolloverStartMonth">Übertrag berechnen ab</label>
+                <input type="month" id="rolloverStartMonth" name="rolloverStartMonth"
+                       th:value="${rolloverSettings.rolloverStartMonth}" required>
+            </div>
+
+            <button type="submit">Speichern</button>
+        </form>
+    </section>
+
+    <section class="card narrow" th:if="${!budgetExists}">
+        <h2>Budget-Übertrag</h2>
+        <p>Richte zuerst ein <a th:href="@{/budgets}">Gesamtbudget</a> ein, um den Übertrag zu konfigurieren.</p>
+    </section>
 </main>
 
 <div id="deleteModal" class="modal-overlay" hidden>

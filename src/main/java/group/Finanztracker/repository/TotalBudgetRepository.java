@@ -10,7 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface TotalBudgetRepository extends JpaRepository<TotalBudget, Long> {
+    @Query("SELECT t FROM TotalBudget t WHERE t.user.id = :userId ORDER BY t.id asc")
     Optional<TotalBudget> findFirstByUser_IdOrderByIdAsc(Long userId);
+
+    @Query("SELECT t FROM TotalBudget t WHERE t.id = :id AND t.user.id = :userId")
     Optional<TotalBudget> findByIdAndUser_Id(Long id, Long userId);
 
     @Modifying
