@@ -1,12 +1,36 @@
-target
+# Git
 .git
-.m2
 .gitignore
+.gitattributes
+.github
+
+# IDE / Editor
 .idea
 .vscode
 *.iml
 .DS_Store
+
+# Claude Code
+.claude
+
+# Build-Artefakte
+target
+
+# Maven local cache
+.m2
+
+# Umgebungsvariablen (werden per --env-file oder Docker-Secret übergeben)
 .env
 .env.*
-README.md
+
+# Lokale Entwicklungsinfrastruktur
 compose.yaml
+
+# Dokumentation (nicht im Image benötigt)
+README.md
+ENDPOINTS.md
+CLAUDE.md
+docs
+
+# Tests (werden zur Laufzeit nicht benötigt)
+src/test
