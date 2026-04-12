@@ -1,18 +1,20 @@
 # Finanztracker
 
-Finanztracker ist eine Spring-Boot-Webanwendung zur persoenlichen Verwaltung von Einnahmen, Ausgaben und Monatsbudgets. Die App kombiniert servergerenderte Oberflaechen mit einer kleinen REST-API und enthaelt inzwischen auch Benutzerkonten mit Registrierung, Login und E-Mail-Verifikation.
+Finanztracker ist eine Spring-Boot-Webanwendung zur persoenlichen Verwaltung von Einnahmen, Ausgaben und Monatsbudgets. Die App kombiniert servergerenderte Oberflaechen mit einer kleinen REST-API und enthaelt Benutzerkonten mit Registrierung, Login und E-Mail-Verifikation.
 
 ## Funktionen
 - Einnahmen und Ausgaben erfassen, bearbeiten und loeschen
 - Wiederkehrende Abonnements mit monatlichem, vierteljaehrlichem oder jaehrlichem Intervall verwalten
 - Kategorien anlegen, bearbeiten und loeschen
-- Globales Monatsbudget definieren
+- Globales Monatsbudget definieren, optional mit Uebertrag des Restbudgets in den Folgemonat
 - Kategorie-Budgets mit festen Monatslimits verwalten
 - Monatsuebersicht mit Restbudget, Ausgaben, Einnahmen und Kategorieverbrauch
 - Filter fuer Transaktionen nach Monat, Typ und Kategorie
+- Analyse-Seite mit monatlicher Einnahmen-/Ausgaben-Entwicklung und Kategorie-Diagrammen
 - Registrierung und Login mit Spring Security
 - E-Mail-Verifikation fuer neue Konten
 - Benutzerbezogene Datenhaltung, damit jede Person nur ihre eigenen Daten sieht
+- Einstellungsseite mit Option zum Loeschen des eigenen Kontos
 
 Wichtig: Budgets werden aktuell nur gegen `EXPENSE`-Transaktionen gerechnet. Einnahmen werden gespeichert und angezeigt, reduzieren aber kein Budget.
 
@@ -103,11 +105,6 @@ Fuer den lokalen Compose-Betrieb gilt:
 - Die App wartet ueber `depends_on` und den Postgres-Healthcheck, bis die Datenbank antwortet.
 
 Die App ist danach unter `http://localhost:8080` erreichbar.
-
-## Erklaerung der eingebauten Aenderungen
-- [application.properties](/c:/IT/spring%20boot/Finanztracker/src/main/resources/application.properties) liest jetzt zusaetzlich `APP_MAIL_REQUIRED` und `APP_PUBLIC_BASE_URL` und setzt produktionsfreundlichere Defaults.
-- [AuthPageController.java](/c:/IT/spring%20boot/Finanztracker/src/main/java/group/Finanztracker/controller/security/AuthPageController.java) benutzt in `currentBaseUrl()` zuerst `APP_PUBLIC_BASE_URL`. Nur wenn die Variable leer ist, wird wie bisher die URL aus dem aktuellen Request aufgebaut.
-- [VerificationMailService.java](/c:/IT/spring%20boot/Finanztracker/src/main/java/group/Finanztracker/service/security/VerificationMailService.java) prueft vor dem Versand, ob Host, Benutzername und Passwort vorhanden sind. Dadurch bekommst du eine saubere Fehlermeldung oder einen Log-Fallback statt eines schwer lesbaren technischen Fehlers.
 
 ## Tests
 ```powershell
