@@ -18,7 +18,7 @@ Die bestehende Schichtarchitektur ist einzuhalten:
 |----------------|-------|
 | `config/`      | Spring-Konfigurationsklassen |
 | `controller/`  | Spring MVC Controller (Thymeleaf-Seiten) |
-| `dto/`         | Datentransferobjekte: `*Form` (UI-Eingabe), `*Request` (Service-Eingabe), `*Response` (Service-Ausgabe), `*ViewModel` (View-Zusammenstellung) |
+| `dto/`         | Datentransferobjekte: `*Request` (Controller- und Service-Eingabe), `*Response` (Service-Ausgabe), `*ViewModel` (View-Zusammenstellung) |
 | `entity/`      | JPA-Entitäten |
 | `exception/`   | Eigene Exception-Klassen und Handler |
 | `mapper/`      | Mapper zwischen Entity ↔ DTO |

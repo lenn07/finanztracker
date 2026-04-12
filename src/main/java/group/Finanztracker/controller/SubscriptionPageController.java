@@ -1,6 +1,5 @@
 package group.Finanztracker.controller;
 
-import group.Finanztracker.dto.SubscriptionForm;
 import group.Finanztracker.dto.SubscriptionRequest;
 import group.Finanztracker.dto.SubscriptionResponse;
 import group.Finanztracker.entity.SubscriptionInterval;
@@ -36,7 +35,7 @@ public class SubscriptionPageController {
     @GetMapping
     public String subscriptions(Model model) {
         subscriptionService.synchronizeTransactionsUpTo(YearMonth.now(clock));
-        populateSubscriptionPage(model, SubscriptionForm.builder()
+        populateSubscriptionPage(model, SubscriptionRequest.builder()
                 .type(TransactionType.EXPENSE)
                 .interval(SubscriptionInterval.MONTHLY)
                 .startDate(LocalDate.now(clock))
@@ -46,7 +45,7 @@ public class SubscriptionPageController {
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute("subscriptionForm") SubscriptionForm form,
+    public String create(@Valid @ModelAttribute("subscriptionForm") SubscriptionRequest form,
                          BindingResult bindingResult,
                          Model model,
                          RedirectAttributes redirectAttributes) {
@@ -54,7 +53,7 @@ public class SubscriptionPageController {
             populateSubscriptionPage(model, form);
             return "subscriptions";
         }
-        subscriptionService.create(toRequest(form));
+        subscriptionService.create(form);
         redirectAttributes.addFlashAttribute("successMessage", "Abonnement wurde gespeichert.");
         return "redirect:/subscriptions";
     }
@@ -63,7 +62,7 @@ public class SubscriptionPageController {
     public String editPage(@PathVariable Long id, Model model) {
         SubscriptionResponse subscription = subscriptionService.findById(id);
         model.addAttribute("subscriptionId", id);
-        model.addAttribute("subscriptionForm", SubscriptionForm.builder()
+        model.addAttribute("subscriptionForm", SubscriptionRequest.builder()
                 .title(subscription.getTitle())
                 .amount(subscription.getAmount())
                 .type(subscription.getType())
@@ -80,7 +79,7 @@ public class SubscriptionPageController {
 
     @PostMapping("/{id}")
     public String update(@PathVariable Long id,
-                         @Valid @ModelAttribute("subscriptionForm") SubscriptionForm form,
+                         @Valid @ModelAttribute("subscriptionForm") SubscriptionRequest form,
                          BindingResult bindingResult,
                          Model model,
                          RedirectAttributes redirectAttributes) {
@@ -89,7 +88,7 @@ public class SubscriptionPageController {
             populateSharedFormData(model);
             return "subscription-edit";
         }
-        subscriptionService.update(id, toRequest(form));
+        subscriptionService.update(id, form);
         redirectAttributes.addFlashAttribute("successMessage", "Abonnement wurde aktualisiert.");
         return "redirect:/subscriptions";
     }
@@ -101,7 +100,7 @@ public class SubscriptionPageController {
         return "redirect:/subscriptions";
     }
 
-    private void populateSubscriptionPage(Model model, SubscriptionForm form) {
+    private void populateSubscriptionPage(Model model, SubscriptionRequest form) {
         model.addAttribute("subscriptions", subscriptionService.findAll());
         model.addAttribute("subscriptionForm", form);
         populateSharedFormData(model);
@@ -113,17 +112,4 @@ public class SubscriptionPageController {
         model.addAttribute("subscriptionIntervals", Arrays.asList(SubscriptionInterval.values()));
     }
 
-    private SubscriptionRequest toRequest(SubscriptionForm form) {
-        return SubscriptionRequest.builder()
-                .title(form.getTitle())
-                .amount(form.getAmount())
-                .type(form.getType())
-                .categoryId(form.getCategoryId())
-                .interval(form.getInterval())
-                .startDate(form.getStartDate())
-                .endDate(form.getEndDate())
-                .note(form.getNote())
-                .active(form.isActive())
-                .build();
-    }
 }

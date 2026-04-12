@@ -1,6 +1,6 @@
 package group.Finanztracker.service;
 
-import group.Finanztracker.dto.RolloverSettingsForm;
+import group.Finanztracker.dto.RolloverSettingsRequest;
 import group.Finanztracker.dto.TotalBudgetRequest;
 import group.Finanztracker.dto.TotalBudgetResponse;
 import group.Finanztracker.entity.TotalBudget;
@@ -33,13 +33,13 @@ public class TotalBudgetService {
                 .map(totalBudgetMapper::toResponse);
     }
 
-    public Optional<RolloverSettingsForm> getRolloverSettings() {
+    public Optional<RolloverSettingsRequest> getRolloverSettings() {
         return totalBudgetRepository.findFirstByUser_IdOrderByIdAsc(currentUserService.getCurrentUserId())
                 .map(b -> {
                     String startMonth = b.getRolloverStartMonth() != null
                             ? YearMonth.from(b.getRolloverStartMonth()).format(DateTimeFormatter.ofPattern("yyyy-MM"))
                             : "";
-                    return RolloverSettingsForm.builder()
+                    return RolloverSettingsRequest.builder()
                             .rolloverEnabled(b.isRolloverEnabled())
                             .rolloverStartMonth(startMonth)
                             .build();
@@ -54,7 +54,7 @@ public class TotalBudgetService {
     }
 
     @Transactional
-    public void saveRolloverSettings(RolloverSettingsForm form) {
+    public void saveRolloverSettings(RolloverSettingsRequest form) {
         TotalBudget budget = totalBudgetRepository.findFirstByUser_IdOrderByIdAsc(currentUserService.getCurrentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Kein Gesamtbudget konfiguriert"));
         budget.setRolloverEnabled(form.isRolloverEnabled());

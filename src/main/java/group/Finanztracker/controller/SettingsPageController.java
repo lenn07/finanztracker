@@ -1,6 +1,6 @@
 package group.Finanztracker.controller;
 
-import group.Finanztracker.dto.RolloverSettingsForm;
+import group.Finanztracker.dto.RolloverSettingsRequest;
 import group.Finanztracker.service.AccountService;
 import group.Finanztracker.service.TotalBudgetService;
 import group.Finanztracker.service.security.CurrentUserService;
@@ -36,7 +36,7 @@ public class SettingsPageController {
     }
 
     @PostMapping("/rollover")
-    public String saveRolloverSettings(@ModelAttribute RolloverSettingsForm form) {
+    public String saveRolloverSettings(@ModelAttribute RolloverSettingsRequest form) {
         totalBudgetService.saveRolloverSettings(form);
         return "redirect:/settings?rolloverSaved=true";
     }

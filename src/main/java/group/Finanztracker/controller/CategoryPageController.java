@@ -1,6 +1,5 @@
 package group.Finanztracker.controller;
 
-import group.Finanztracker.dto.CategoryForm;
 import group.Finanztracker.dto.CategoryResponse;
 import group.Finanztracker.dto.CategoryRequest;
 import group.Finanztracker.service.CategoryService;
@@ -26,12 +25,12 @@ public class CategoryPageController {
     @GetMapping
     public String categories(Model model) {
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("categoryForm", new CategoryForm());
+        model.addAttribute("categoryForm", new CategoryRequest());
         return "categories";
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute("categoryForm") CategoryForm form,
+    public String create(@Valid @ModelAttribute("categoryForm") CategoryRequest form,
                          BindingResult bindingResult,
                          Model model,
                          RedirectAttributes redirectAttributes) {
@@ -39,7 +38,7 @@ public class CategoryPageController {
             model.addAttribute("categories", categoryService.findAll());
             return "categories";
         }
-        categoryService.create(toRequest(form));
+        categoryService.create(form);
         redirectAttributes.addFlashAttribute("successMessage", "Kategorie wurde angelegt.");
         return "redirect:/categories";
     }
@@ -48,13 +47,13 @@ public class CategoryPageController {
     public String editPage(@PathVariable Long id, Model model) {
         CategoryResponse category = categoryService.findById(id);
         model.addAttribute("categoryId", id);
-        model.addAttribute("categoryForm", CategoryForm.builder().name(category.getName()).build());
+        model.addAttribute("categoryForm", CategoryRequest.builder().name(category.getName()).build());
         return "category-edit";
     }
 
     @PostMapping("/{id}")
     public String update(@PathVariable Long id,
-                         @Valid @ModelAttribute("categoryForm") CategoryForm form,
+                         @Valid @ModelAttribute("categoryForm") CategoryRequest form,
                          BindingResult bindingResult,
                          Model model,
                          RedirectAttributes redirectAttributes) {
@@ -62,7 +61,7 @@ public class CategoryPageController {
             model.addAttribute("categoryId", id);
             return "category-edit";
         }
-        categoryService.update(id, toRequest(form));
+        categoryService.update(id, form);
         redirectAttributes.addFlashAttribute("successMessage", "Kategorie wurde aktualisiert.");
         return "redirect:/categories";
     }
@@ -72,11 +71,5 @@ public class CategoryPageController {
         categoryService.delete(id);
         redirectAttributes.addFlashAttribute("successMessage", "Kategorie wurde gelöscht.");
         return "redirect:/categories";
-    }
-
-    private CategoryRequest toRequest(CategoryForm form) {
-        return CategoryRequest.builder()
-                .name(form.getName())
-                .build();
     }
 }

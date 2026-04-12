@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RolloverSettingsForm {
+public class RolloverSettingsRequest {
     private boolean rolloverEnabled;
     // Format: "yyyy-MM" — kommt von <input type="month">
     @Pattern(regexp = "^$|^\\d{4}-\\d{2}$", message = "Ungültiges Monatformat")

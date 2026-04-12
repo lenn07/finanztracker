@@ -38,3 +38,6 @@ build/
 
 # Maven local repository
 .m2/
+
+#claude
+.claude/

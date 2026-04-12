@@ -2,7 +2,6 @@ package group.Finanztracker.controller;
 
 import group.Finanztracker.dto.CategoryResponse;
 import group.Finanztracker.dto.TransactionResponse;
-import group.Finanztracker.dto.TransactionForm;
 import group.Finanztracker.dto.TransactionRequest;
 import group.Finanztracker.entity.TransactionType;
 import group.Finanztracker.service.CategoryService;
@@ -44,7 +43,7 @@ public class TransactionPageController {
                                @RequestParam(required = false) Long filterCategoryId,
                                Model model) {
         YearMonth selectedMonth = month != null ? month : YearMonth.now(clock);
-        TransactionForm form = TransactionForm.builder()
+        TransactionRequest form = TransactionRequest.builder()
                 .date(LocalDate.now(clock))
                 .type(TransactionType.EXPENSE)
                 .build();
@@ -54,7 +53,7 @@ public class TransactionPageController {
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute("transactionForm") TransactionForm form,
+    public String create(@Valid @ModelAttribute("transactionForm") TransactionRequest form,
                          BindingResult bindingResult,
                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
                          @RequestParam(required = false) TransactionType filterType,
@@ -67,7 +66,7 @@ public class TransactionPageController {
             model.addAttribute("editing", false);
             return "transactions";
         }
-        transactionService.create(toRequest(form));
+        transactionService.create(form);
         redirectAttributes.addFlashAttribute("successMessage", "Transaktion wurde gespeichert.");
         return "redirect:/transactions?month=" + selectedMonth;
     }
@@ -75,7 +74,7 @@ public class TransactionPageController {
     @GetMapping("/{id}/edit")
     public String editPage(@PathVariable Long id, Model model) {
         TransactionResponse transaction = transactionService.findById(id);
-        TransactionForm form = TransactionForm.builder()
+        TransactionRequest form = TransactionRequest.builder()
                 .title(transaction.getTitle())
                 .amount(transaction.getAmount())
                 .type(transaction.getType())
@@ -93,7 +92,7 @@ public class TransactionPageController {
 
     @PostMapping("/{id}")
     public String update(@PathVariable Long id,
-                         @Valid @ModelAttribute("transactionForm") TransactionForm form,
+                         @Valid @ModelAttribute("transactionForm") TransactionRequest form,
                          BindingResult bindingResult,
                          Model model,
                          RedirectAttributes redirectAttributes) {
@@ -104,7 +103,7 @@ public class TransactionPageController {
             model.addAttribute("editing", true);
             return "transaction-edit";
         }
-        transactionService.update(id, toRequest(form));
+        transactionService.update(id, form);
         redirectAttributes.addFlashAttribute("successMessage", "Transaktion wurde aktualisiert.");
         return "redirect:/transactions?month=" + YearMonth.from(form.getDate());
     }
@@ -117,7 +116,7 @@ public class TransactionPageController {
     }
 
     private void populateTransactionPage(Model model,
-                                         TransactionForm form,
+                                         TransactionRequest form,
                                          YearMonth selectedMonth,
                                          TransactionType type,
                                          Long categoryId) {
@@ -132,16 +131,5 @@ public class TransactionPageController {
         model.addAttribute("selectedMonth", selectedMonth);
         model.addAttribute("selectedType", type);
         model.addAttribute("selectedCategoryId", categoryId);
-    }
-
-    private TransactionRequest toRequest(TransactionForm form) {
-        return TransactionRequest.builder()
-                .title(form.getTitle())
-                .amount(form.getAmount())
-                .type(form.getType())
-                .categoryId(form.getCategoryId())
-                .date(form.getDate())
-                .note(form.getNote())
-                .build();
     }
 }
