@@ -18,7 +18,8 @@ public class BudgetSettingsViewModel {
 
     private Long totalBudgetId;
     private BigDecimal totalMonthlyLimit;
-    private BigDecimal configuredCategoryBudgetSum;
-    private boolean categoryBudgetSumExceedsTotalBudget;
+    private BigDecimal configuredPercentageSum;
+    private BigDecimal configuredMonthlyLimitSum;
+    private boolean totalBudgetConfigured;
     private List<CategoryBudgetResponse> categoryBudgets;
 }

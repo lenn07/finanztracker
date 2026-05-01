@@ -42,16 +42,19 @@
 
         <div class="summary-panel">
             <p>Aktuelles Gesamtbudget: <strong th:text="${#numbers.formatDecimal(budgetSettings.totalMonthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</strong></p>
-            <p>Summe aller Kategorie-Budgets: <strong th:text="${#numbers.formatDecimal(budgetSettings.configuredCategoryBudgetSum, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</strong></p>
-            <p th:if="${budgetSettings.categoryBudgetSumExceedsTotalBudget}" class="message warning">
-                Die Summe der Kategorie-Budgets ist groesser als dein Gesamtbudget.
+            <p>Aktuell verplant:
+                <strong th:text="${#numbers.formatDecimal(budgetSettings.configuredPercentageSum, 1, 'POINT', 2, 'COMMA')} + ' % (' + ${#numbers.formatDecimal(budgetSettings.configuredMonthlyLimitSum, 1, 'POINT', 2, 'COMMA')} + ' EUR)'">0</strong>
             </p>
         </div>
     </section>
 
     <section class="card">
         <h2>Kategorie-Budget hinzufuegen</h2>
-        <form method="post" th:action="@{/budgets/category}" th:object="${categoryBudgetForm}" class="stack-form">
+        <div th:if="${!budgetSettings.totalBudgetConfigured}" class="message warning">
+            Bitte zuerst ein Gesamtbudget anlegen, bevor Kategorie-Budgets hinzugefügt werden können.
+        </div>
+        <form th:if="${budgetSettings.totalBudgetConfigured}"
+              method="post" th:action="@{/budgets/category}" th:object="${categoryBudgetForm}" class="stack-form">
             <label for="categoryId">Kategorie</label>
             <select id="categoryId" th:field="*{categoryId}">
                 <option value="">Bitte waehlen</option>
@@ -59,9 +62,13 @@
             </select>
             <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
 
-            <label for="monthlyLimit">Monatslimit</label>
-            <input id="monthlyLimit" type="number" step="0.01" min="0.01" th:field="*{monthlyLimit}">
-            <p class="field-error" th:if="${#fields.hasErrors('monthlyLimit')}" th:errors="*{monthlyLimit}"></p>
+            <label for="percentage">Prozent vom Gesamtbudget</label>
+            <input id="percentage" type="number" step="0.01" min="0.01" max="100" th:field="*{percentage}">
+            <p class="field-hint">
+                Aktuelles Gesamtbudget:
+                <span th:text="${#numbers.formatDecimal(budgetSettings.totalMonthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</span>
+            </p>
+            <p class="field-error" th:if="${#fields.hasErrors('percentage')}" th:errors="*{percentage}"></p>
 
             <button type="submit">Kategorie-Budget speichern</button>
         </form>
@@ -74,14 +81,14 @@
                 <thead>
                 <tr>
                     <th>Kategorie</th>
-                    <th>Monatslimit</th>
+                    <th>Anteil</th>
                     <th>Aktionen</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="budget : ${budgetSettings.categoryBudgets}">
                     <td th:text="${budget.categoryName}">Lebensmittel</td>
-                    <td th:text="${#numbers.formatDecimal(budget.monthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>
+                    <td th:text="${#numbers.formatDecimal(budget.percentage, 1, 'POINT', 2, 'COMMA')} + ' % (' + ${#numbers.formatDecimal(budget.calculatedMonthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR)'">0</td>
                     <td class="actions">
                         <a class="button-link secondary" th:href="@{/budgets/category/{id}/edit(id=${budget.id})}">Bearbeiten</a>
                         <form method="post" th:action="@{/budgets/category/{id}/delete(id=${budget.id})}">

@@ -12,5 +12,6 @@ public class CategoryBudgetResponse {
     private Long id;
     private Long categoryId;
     private String categoryName;
-    private BigDecimal monthlyLimit;
+    private BigDecimal percentage;
+    private BigDecimal calculatedMonthlyLimit;
 }

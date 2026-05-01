@@ -63,20 +63,32 @@ public class BudgetPageController {
             populateBudgetPage(model, totalBudgetForm, form);
             return "budgets";
         }
-        categoryBudgetService.create(form);
+        try {
+            categoryBudgetService.create(form);
+        } catch (IllegalStateException ex) {
+            bindingResult.rejectValue("percentage", "categoryBudget.invalid", ex.getMessage());
+            populateBudgetPage(model, totalBudgetForm, form);
+            return "budgets";
+        }
         redirectAttributes.addFlashAttribute("successMessage", "Kategorie-Budget wurde gespeichert.");
         return "redirect:/budgets";
     }
 
     @GetMapping("/category/{id}/edit")
-    public String editCategoryBudget(@PathVariable Long id, Model model) {
+    public String editCategoryBudget(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        if (!categoryBudgetService.hasUsableTotalBudget()) {
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Bitte zuerst ein Gesamtbudget anlegen, bevor Kategorie-Budgets bearbeitet werden können.");
+            return "redirect:/budgets";
+        }
         CategoryBudgetResponse categoryBudget = categoryBudgetService.getById(id);
         model.addAttribute("categoryBudgetId", id);
         model.addAttribute("categoryBudgetForm", CategoryBudgetRequest.builder()
                 .categoryId(categoryBudget.getCategoryId())
-                .monthlyLimit(categoryBudget.getMonthlyLimit())
+                .percentage(categoryBudget.getPercentage())
                 .build());
         model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("totalMonthlyLimit", categoryBudget.getCalculatedMonthlyLimit());
         return "budget-category-edit";
     }
 
@@ -91,7 +103,14 @@ public class BudgetPageController {
             model.addAttribute("categories", categoryService.findAll());
             return "budget-category-edit";
         }
-        categoryBudgetService.update(id, form);
+        try {
+            categoryBudgetService.update(id, form);
+        } catch (IllegalStateException ex) {
+            bindingResult.rejectValue("percentage", "categoryBudget.invalid", ex.getMessage());
+            model.addAttribute("categoryBudgetId", id);
+            model.addAttribute("categories", categoryService.findAll());
+            return "budget-category-edit";
+        }
         redirectAttributes.addFlashAttribute("successMessage", "Kategorie-Budget wurde aktualisiert.");
         return "redirect:/budgets";
     }
@@ -111,5 +130,4 @@ public class BudgetPageController {
         model.addAttribute("totalBudgetForm", totalBudgetForm);
         model.addAttribute("categoryBudgetForm", categoryBudgetForm);
     }
-
 }

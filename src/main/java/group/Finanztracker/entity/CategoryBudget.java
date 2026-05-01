@@ -21,6 +21,6 @@ public class CategoryBudget {
 	@JoinColumn(name = "category_id", nullable = false, unique = true)
 	private Category category;
 
-	@Column(name = "monthly_limit", nullable = false, precision = 12, scale = 2)
-	private BigDecimal monthlyLimit;
+	@Column(name = "percentage", nullable = false, precision = 5, scale = 2)
+	private BigDecimal percentage;
 }

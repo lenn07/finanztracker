@@ -5,6 +5,7 @@ import group.Finanztracker.dto.MonthlyOverviewResponse;
 import group.Finanztracker.dto.TotalBudgetResponse;
 import group.Finanztracker.entity.Category;
 import group.Finanztracker.entity.CategoryBudget;
+import group.Finanztracker.mapper.CategoryBudgetMapper;
 import group.Finanztracker.repository.CategoryBudgetRepository;
 import group.Finanztracker.repository.CategoryRepository;
 import group.Finanztracker.service.security.CurrentUserService;
@@ -27,6 +28,7 @@ public class MonthlyOverviewService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryBudgetRepository categoryBudgetRepository;
+    private final CategoryBudgetMapper categoryBudgetMapper;
     private final TransactionService transactionService;
     private final TotalBudgetService totalBudgetService;
     private final CurrentUserService currentUserService;
@@ -50,12 +52,8 @@ public class MonthlyOverviewService {
             budgetsByCategoryId.put(budget.getCategory().getId(), budget);
         }
 
-        BigDecimal configuredCategoryBudgetSum = allBudgets.stream()
-                .map(CategoryBudget::getMonthlyLimit)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         List<MonthlyCategorySummaryResponse> categorySummaries = categoryRepository.findAllByUser_IdOrderByNameAsc(userId).stream()
-                .map(category -> buildCategorySummary(category, budgetsByCategoryId.get(category.getId()), month))
+                .map(category -> buildCategorySummary(category, budgetsByCategoryId.get(category.getId()), month, totalBudget))
                 .toList();
 
         return MonthlyOverviewResponse.builder()
@@ -65,9 +63,6 @@ public class MonthlyOverviewService {
                 .remainingBudget(totalBudget.subtract(totalSpent))
                 .overBudget(effectiveBudget.compareTo(BigDecimal.ZERO) > 0 && totalSpent.compareTo(effectiveBudget) > 0)
                 .totalIncome(totalIncome)
-                .configuredCategoryBudgetSum(configuredCategoryBudgetSum)
-                .categoryBudgetSumExceedsTotalBudget(totalBudget.compareTo(BigDecimal.ZERO) > 0
-                        && configuredCategoryBudgetSum.compareTo(totalBudget) > 0)
                 .categories(categorySummaries)
                 .effectiveBudget(effectiveBudget)
                 .rolloverEnabled(rolloverEnabled)
@@ -95,13 +90,17 @@ public class MonthlyOverviewService {
         return rollover;
     }
 
-    private MonthlyCategorySummaryResponse buildCategorySummary(Category category, CategoryBudget budget, YearMonth month) {
+    private MonthlyCategorySummaryResponse buildCategorySummary(Category category, CategoryBudget budget, YearMonth month, BigDecimal totalMonthlyLimit) {
         BigDecimal spent = transactionService.sumExpensesForCategoryAndMonth(category.getId(), month);
-        BigDecimal limit = budget != null ? budget.getMonthlyLimit() : null;
+        BigDecimal percentage = budget != null ? budget.getPercentage() : null;
+        BigDecimal limit = budget != null
+                ? categoryBudgetMapper.calculateMonthlyLimit(percentage, totalMonthlyLimit)
+                : null;
         BigDecimal remaining = limit != null ? limit.subtract(spent) : null;
         return MonthlyCategorySummaryResponse.builder()
                 .categoryId(category.getId())
                 .categoryName(category.getName())
+                .percentage(percentage)
                 .monthlyLimit(limit)
                 .spent(spent)
                 .remaining(remaining)

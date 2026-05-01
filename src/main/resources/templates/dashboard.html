@@ -67,11 +67,8 @@
         <div class="section-head">
             <div>
                 <h2>Kategorie-Budgets</h2>
-                <p>Feste Monatslimits werden gegen die Ausgaben dieses Monats geprueft.</p>
+                <p>Anteil am Gesamtbudget je Kategorie und Ausgaben dieses Monats.</p>
             </div>
-            <p th:if="${overview.categoryBudgetSumExceedsTotalBudget}" class="message warning">
-                Die Summe deiner Kategorie-Budgets liegt ueber dem Gesamtbudget.
-            </p>
         </div>
 
         <div class="table-wrapper">
@@ -89,7 +86,8 @@
                 <tr th:each="category : ${overview.categories}">
                     <td th:text="${category.categoryName}">Lebensmittel</td>
                     <td>
-                        <span th:if="${category.hasBudget}" th:text="${#numbers.formatDecimal(category.monthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</span>
+                        <span th:if="${category.hasBudget}"
+                              th:text="${#numbers.formatDecimal(category.percentage, 1, 'POINT', 2, 'COMMA')} + ' % (' + ${#numbers.formatDecimal(category.monthlyLimit, 1, 'POINT', 2, 'COMMA')} + ' EUR)'">0</span>
                         <span th:if="${!category.hasBudget}">Kein Limit</span>
                     </td>
                     <td th:text="${#numbers.formatDecimal(category.spent, 1, 'POINT', 2, 'COMMA')} + ' EUR'">0</td>

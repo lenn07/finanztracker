@@ -17,6 +17,7 @@ public class MonthlyCategorySummaryResponse {
 
     private Long categoryId;
     private String categoryName;
+    private BigDecimal percentage;
     private BigDecimal monthlyLimit;
     private BigDecimal spent;
     private BigDecimal remaining;
